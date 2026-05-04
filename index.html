@@ -1,0 +1,2225 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Controle de Acesso — Portaria V3.0</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+<!-- Firebase SDK v10 (modular via compat CDN) -->
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+
+<style>
+  :root {
+    --bg:        #0d0f14;
+    --surface:   #13161e;
+    --card:      #191d28;
+    --border:    #252b3a;
+    --accent:    #f5a623;
+    --accent2:   #e8891a;
+    --danger:    #e05555;
+    --success:   #3dba7c;
+    --info:      #4a9eff;
+    --text:      #e8eaf0;
+    --muted:     #7a8099;
+    --highlight: #252d42;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+  }
+
+  /* ── Header ── */
+  header {
+    background: var(--surface);
+    border-bottom: 2px solid var(--accent);
+    padding: 0 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 64px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: 0 4px 24px rgba(0,0,0,.5);
+    gap: 1rem;
+  }
+  .logo { display: flex; align-items: center; gap: .75rem; flex-shrink: 0; }
+  .logo-icon {
+    width: 36px; height: 36px;
+    background: var(--accent);
+    border-radius: 6px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.1rem;
+  }
+  .logo-text {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.35rem;
+    letter-spacing: .08em;
+    color: var(--text);
+  }
+  .logo-text span { color: var(--accent); }
+
+  /* ── Global Header Search ── */
+  .header-search-wrap {
+    flex: 1; max-width: 420px;
+    position: relative;
+  }
+  .header-search-input {
+    width: 100%;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: .88rem;
+    padding: .5rem .9rem .5rem 2.4rem;
+    outline: none;
+    transition: border-color .2s, box-shadow .2s;
+  }
+  .header-search-input:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(245,166,35,.12);
+  }
+  .header-search-input::placeholder { color: var(--muted); opacity: .6; }
+  .header-search-icon {
+    position: absolute; left: .8rem; top: 50%;
+    transform: translateY(-50%); color: var(--muted);
+    font-size: .9rem; pointer-events: none;
+  }
+  .header-search-dropdown {
+    position: absolute; top: calc(100% + 4px); left: 0; right: 0; z-index: 200;
+    background: var(--card); border: 1px solid var(--accent);
+    border-radius: 10px; max-height: 320px; overflow-y: auto;
+    box-shadow: 0 12px 32px rgba(0,0,0,.6);
+    display: none;
+  }
+  .header-search-dropdown.open { display: block; }
+  .hsd-item {
+    display: flex; align-items: center; gap: .75rem;
+    padding: .75rem 1rem;
+    border-bottom: 1px solid var(--border);
+    cursor: pointer;
+    transition: background .12s;
+  }
+  .hsd-item:last-child { border-bottom: none; }
+  .hsd-item:hover { background: var(--highlight); }
+  .hsd-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+  .hsd-dot-in  { background: var(--success); box-shadow: 0 0 6px var(--success); animation: pulse-g 2s infinite; }
+  .hsd-dot-out { background: var(--muted); }
+  .hsd-info { flex: 1; min-width: 0; }
+  .hsd-name { font-weight: 600; font-size: .88rem; color: var(--text); }
+  .hsd-meta { font-size: .72rem; color: var(--muted); font-family: 'DM Mono', monospace; margin-top: .1rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .hsd-actions { display: flex; gap: .4rem; flex-shrink: 0; }
+  .hsd-btn-in {
+    font-size: .72rem; font-weight: 700; padding: .3rem .65rem;
+    border-radius: 6px; border: 1px solid rgba(61,186,124,.35);
+    background: rgba(61,186,124,.12); color: var(--success);
+    cursor: pointer; transition: all .15s; white-space: nowrap;
+  }
+  .hsd-btn-in:hover { background: rgba(61,186,124,.28); }
+  .hsd-btn-in:disabled { opacity: .3; cursor: not-allowed; }
+  .hsd-btn-out {
+    font-size: .72rem; font-weight: 700; padding: .3rem .65rem;
+    border-radius: 6px; border: 1px solid rgba(245,166,35,.3);
+    background: rgba(245,166,35,.1); color: var(--accent);
+    cursor: pointer; transition: all .15s; white-space: nowrap;
+  }
+  .hsd-btn-out:hover { background: rgba(245,166,35,.25); }
+  .hsd-btn-out:disabled { opacity: .3; cursor: not-allowed; }
+  .hsd-no-results { padding: 1rem; text-align: center; color: var(--muted); font-size: .85rem; }
+
+  .header-right { display: flex; align-items: center; gap: .75rem; flex-shrink: 0; }
+  #live-clock {
+    font-family: 'DM Mono', monospace;
+    font-size: .82rem;
+    color: var(--muted);
+    background: var(--card);
+    padding: .35rem .65rem;
+    border-radius: 6px;
+    border: 1px solid var(--border);
+    white-space: nowrap;
+  }
+  .badge-status {
+    background: rgba(61,186,124,.15);
+    color: var(--success);
+    border: 1px solid rgba(61,186,124,.3);
+    padding: .3rem .75rem;
+    border-radius: 20px;
+    font-size: .72rem;
+    font-weight: 600;
+    letter-spacing: .05em;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+  .badge-status.offline {
+    background: rgba(224,85,85,.15);
+    color: var(--danger);
+    border-color: rgba(224,85,85,.3);
+  }
+
+  /* ── Loading overlay ── */
+  #loading-overlay {
+    position: fixed; inset: 0;
+    background: var(--bg);
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    z-index: 9999;
+    gap: 1rem;
+    transition: opacity .4s;
+  }
+  #loading-overlay.hidden { opacity: 0; pointer-events: none; }
+  .loading-spinner {
+    width: 48px; height: 48px;
+    border: 3px solid var(--border);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .loading-text {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.2rem;
+    letter-spacing: .1em;
+    color: var(--muted);
+  }
+
+  /* ── Main ── */
+  main { max-width: 1340px; margin: 2rem auto; padding: 0 1.5rem 4rem; }
+
+  /* ── Tabs ── */
+  .tabs {
+    display: flex; gap: .25rem;
+    margin-bottom: 2rem;
+    border-bottom: 2px solid var(--border);
+    flex-wrap: wrap;
+  }
+  .tab-btn {
+    font-family: 'DM Sans', sans-serif;
+    font-size: .85rem; font-weight: 600;
+    letter-spacing: .04em; text-transform: uppercase;
+    padding: .75rem 1.25rem;
+    background: transparent; border: none;
+    color: var(--muted); cursor: pointer;
+    border-bottom: 3px solid transparent;
+    margin-bottom: -2px;
+    transition: color .2s, border-color .2s;
+    display: flex; align-items: center; gap: .5rem;
+  }
+  .tab-btn:hover { color: var(--text); }
+  .tab-btn.active { color: var(--accent); border-bottom-color: var(--accent); }
+  .tab-btn .tab-count {
+    background: var(--highlight); color: var(--muted);
+    font-size: .68rem; padding: .12rem .42rem;
+    border-radius: 10px; font-weight: 500;
+  }
+  .tab-btn.active .tab-count {
+    background: rgba(245,166,35,.15); color: var(--accent);
+  }
+  .tab-panel { display: none; }
+  .tab-panel.active { display: block; }
+
+  /* ── Section header ── */
+  .section-header {
+    display: flex; align-items: flex-end;
+    justify-content: space-between;
+    margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem;
+  }
+  .section-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.6rem; letter-spacing: .06em; color: var(--text);
+  }
+  .section-title span { color: var(--accent); }
+  .section-sub { font-size: .8rem; color: var(--muted); margin-top: .2rem; }
+
+  /* ── Form card ── */
+  .form-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px; padding: 2rem;
+    margin-bottom: 2rem;
+    position: relative; overflow: hidden;
+  }
+  .form-card::before {
+    content: ''; position: absolute;
+    top: 0; left: 0; right: 0; height: 3px;
+    background: linear-gradient(90deg, var(--accent), transparent);
+  }
+  .form-card-title {
+    font-size: .75rem; font-weight: 600;
+    letter-spacing: .12em; text-transform: uppercase;
+    color: var(--accent); margin-bottom: 1.5rem;
+    display: flex; align-items: center; gap: .5rem;
+  }
+  .form-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 1rem 1.25rem;
+  }
+  .form-group { display: flex; flex-direction: column; gap: .4rem; }
+  .form-group.full { grid-column: 1 / -1; }
+  .form-group.half { grid-column: span 2; }
+
+  label {
+    font-size: .72rem; font-weight: 600;
+    letter-spacing: .08em; text-transform: uppercase; color: var(--muted);
+  }
+  label .req { color: var(--accent); margin-left: 2px; }
+
+  input, select, textarea {
+    font-family: 'DM Sans', sans-serif; font-size: .9rem;
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 8px; color: var(--text);
+    padding: .6rem .9rem; outline: none;
+    transition: border-color .2s, box-shadow .2s; width: 100%;
+  }
+  input:focus, select:focus, textarea:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(245,166,35,.12);
+  }
+  input::placeholder { color: var(--muted); opacity: .6; }
+  select { cursor: pointer; }
+  select option { background: var(--card); }
+
+  /* ── Buttons ── */
+  .btn-row { display: flex; gap: .75rem; margin-top: 1.5rem; flex-wrap: wrap; }
+  .btn {
+    font-family: 'DM Sans', sans-serif;
+    font-size: .85rem; font-weight: 600;
+    letter-spacing: .04em; padding: .65rem 1.4rem;
+    border: none; border-radius: 8px; cursor: pointer;
+    transition: all .18s; display: flex; align-items: center; gap: .5rem;
+  }
+  .btn:disabled { opacity: .5; cursor: not-allowed; }
+  .btn-primary { background: var(--accent); color: #0d0f14; }
+  .btn-primary:hover:not(:disabled) { background: var(--accent2); transform: translateY(-1px); box-shadow: 0 4px 12px rgba(245,166,35,.3); }
+  .btn-outline { background: transparent; border: 1px solid var(--border); color: var(--muted); }
+  .btn-outline:hover { border-color: var(--accent); color: var(--accent); }
+  .btn-danger { background: rgba(224,85,85,.12); border: 1px solid rgba(224,85,85,.3); color: var(--danger); }
+  .btn-danger:hover { background: rgba(224,85,85,.25); }
+  .btn-success { background: rgba(61,186,124,.15); border: 1px solid rgba(61,186,124,.3); color: var(--success); }
+  .btn-success:hover { background: rgba(61,186,124,.3); }
+
+  /* ── Filter bar ── */
+  .filter-bar { display: flex; gap: .75rem; margin-bottom: 1.25rem; flex-wrap: wrap; align-items: center; }
+  .search-wrap { position: relative; flex: 1; min-width: 200px; }
+  .search-wrap input { padding-left: 2.5rem; }
+  .search-icon { position: absolute; left: .85rem; top: 50%; transform: translateY(-50%); color: var(--muted); font-size: .9rem; pointer-events: none; }
+  .filter-select { min-width: 150px; flex: 0 0 auto; }
+
+  /* ── Table ── */
+  .table-wrap { overflow-x: auto; border-radius: 12px; border: 1px solid var(--border); }
+  table { width: 100%; border-collapse: collapse; font-size: .85rem; min-width: 600px; }
+  thead { background: var(--surface); position: sticky; top: 0; }
+  th {
+    font-size: .7rem; font-weight: 600;
+    letter-spacing: .1em; text-transform: uppercase;
+    color: var(--muted); padding: .9rem 1rem;
+    text-align: left; border-bottom: 1px solid var(--border);
+    white-space: nowrap; cursor: pointer; user-select: none;
+  }
+  th:hover { color: var(--accent); }
+  th .sort-icon { opacity: .4; margin-left: .3rem; }
+  td {
+    padding: .8rem 1rem; border-bottom: 1px solid var(--border);
+    color: var(--text); max-width: 220px;
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: var(--highlight); }
+  .td-name { font-weight: 500; }
+  .td-mono { font-family: 'DM Mono', monospace; font-size: .8rem; color: var(--muted); }
+  .td-plate {
+    font-family: 'DM Mono', monospace; font-size: .78rem;
+    background: var(--highlight); border: 1px solid var(--border);
+    border-radius: 4px; padding: .15rem .5rem;
+    display: inline-block; letter-spacing: .1em; font-weight: 500;
+  }
+  .td-plate-empty { color: var(--muted); font-size: .8rem; }
+
+  .badge {
+    display: inline-flex; align-items: center; gap: .3rem;
+    padding: .2rem .6rem; border-radius: 20px;
+    font-size: .72rem; font-weight: 600; letter-spacing: .04em;
+  }
+  .badge-in  { background: rgba(61,186,124,.12); color: var(--success); border: 1px solid rgba(61,186,124,.25); }
+  .badge-out { background: rgba(122,128,153,.1);  color: var(--muted);   border: 1px solid var(--border); }
+  .badge-open{ background: rgba(245,166,35,.12);  color: var(--accent);  border: 1px solid rgba(245,166,35,.25); }
+
+  .action-btn {
+    background: none; border: 1px solid var(--border);
+    color: var(--muted); padding: .25rem .55rem;
+    border-radius: 6px; cursor: pointer;
+    font-size: .8rem; transition: all .15s; margin-right: .3rem;
+  }
+  .action-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .action-btn.del:hover { border-color: var(--danger); color: var(--danger); }
+  .action-btn.success-btn:hover { border-color: var(--success); color: var(--success); }
+
+  /* ── Stats row ── */
+  .stats-row { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 1rem; margin-bottom: 2rem; }
+  .stat-card { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 1rem 1.25rem; position: relative; overflow: hidden; }
+  .stat-card::after { content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 2px; background: var(--accent); opacity: .4; }
+  .stat-value { font-family: 'Bebas Neue', sans-serif; font-size: 2rem; letter-spacing: .04em; color: var(--accent); line-height: 1; }
+  .stat-label { font-size: .72rem; color: var(--muted); font-weight: 500; letter-spacing: .06em; text-transform: uppercase; margin-top: .35rem; }
+
+  /* ── Pagination ── */
+  .pagination { display: flex; align-items: center; justify-content: space-between; margin-top: 1rem; flex-wrap: wrap; gap: .5rem; }
+  .page-info { font-size: .8rem; color: var(--muted); }
+  .page-btns { display: flex; gap: .4rem; }
+  .page-btn {
+    background: var(--card); border: 1px solid var(--border);
+    color: var(--muted); padding: .35rem .65rem; border-radius: 6px;
+    cursor: pointer; font-size: .8rem;
+    font-family: 'DM Mono', monospace; transition: all .15s;
+  }
+  .page-btn:hover, .page-btn.active { border-color: var(--accent); color: var(--accent); }
+
+  /* ── Modal ── */
+  .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.7); backdrop-filter: blur(4px); z-index: 200; align-items: center; justify-content: center; }
+  .modal-overlay.open { display: flex; }
+  .modal { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 2rem; width: min(580px, 95vw); position: relative; animation: slideUp .22s ease; max-height: 90vh; overflow-y: auto; }
+  @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+  .modal-close { position: absolute; top: 1rem; right: 1rem; background: none; border: none; color: var(--muted); font-size: 1.2rem; cursor: pointer; transition: color .15s; }
+  .modal-close:hover { color: var(--danger); }
+  .modal-title { font-family: 'Bebas Neue', sans-serif; font-size: 1.3rem; letter-spacing: .06em; margin-bottom: 1.5rem; color: var(--text); }
+
+  /* ── Toast ── */
+  #toast {
+    position: fixed; bottom: 2rem; right: 2rem;
+    background: var(--card); border: 1px solid var(--border);
+    border-left: 4px solid var(--success); border-radius: 10px;
+    padding: .9rem 1.4rem; color: var(--text);
+    font-size: .85rem; font-weight: 500; z-index: 300;
+    transform: translateX(120%); transition: transform .3s ease;
+    min-width: 240px; box-shadow: 0 8px 24px rgba(0,0,0,.4);
+  }
+  #toast.show { transform: translateX(0); }
+  #toast.error { border-left-color: var(--danger); }
+
+  /* ── Empty state ── */
+  .empty-state { text-align: center; padding: 4rem 2rem; color: var(--muted); }
+  .empty-icon { font-size: 3rem; margin-bottom: 1rem; opacity: .4; }
+  .empty-text { font-size: .9rem; }
+
+  /* ── Autocomplete dropdown ── */
+  .autocomplete-wrap { position: relative; }
+  .autocomplete-list {
+    position: absolute; top: 100%; left: 0; right: 0; z-index: 50;
+    background: var(--card); border: 1px solid var(--accent);
+    border-top: none; border-radius: 0 0 8px 8px;
+    max-height: 260px; overflow-y: auto;
+    box-shadow: 0 8px 24px rgba(0,0,0,.5);
+    display: none;
+  }
+  .autocomplete-list.open { display: block; }
+  .autocomplete-item {
+    padding: .6rem 1rem; cursor: pointer;
+    border-bottom: 1px solid var(--border);
+    transition: background .12s;
+    display: flex; flex-direction: column; gap: .15rem;
+  }
+  .autocomplete-item:last-child { border-bottom: none; }
+  .autocomplete-item:hover, .autocomplete-item.highlighted { background: var(--highlight); }
+  .ac-name { font-weight: 600; font-size: .88rem; color: var(--text); }
+  .ac-meta { font-size: .74rem; color: var(--muted); font-family: 'DM Mono', monospace; }
+  .ac-badge { display: inline-block; font-size: .65rem; background: rgba(245,166,35,.15); color: var(--accent); border: 1px solid rgba(245,166,35,.3); border-radius: 10px; padding: .1rem .4rem; margin-left: .4rem; }
+
+  /* ── Trailer plate field indicator ── */
+  .trailer-wrap { position: relative; }
+  .trailer-label-tag {
+    position: absolute; right: .6rem; top: 50%; transform: translateY(-50%);
+    font-size: .6rem; font-weight: 700; letter-spacing: .08em;
+    color: var(--accent); background: rgba(245,166,35,.1);
+    border: 1px solid rgba(245,166,35,.25); border-radius: 4px;
+    padding: .1rem .35rem; pointer-events: none;
+    text-transform: uppercase;
+  }
+
+  /* ── Quick Search Panel ── */
+  .quick-search-panel {
+    background: var(--card);
+    border: 1px solid var(--accent);
+    border-radius: 14px;
+    padding: 1.5rem;
+    margin-bottom: 1.75rem;
+    position: relative;
+    overflow: hidden;
+  }
+  .quick-search-panel::before {
+    content: '';
+    position: absolute; top: 0; left: 0; right: 0; height: 3px;
+    background: linear-gradient(90deg, var(--accent), var(--success), var(--accent));
+    background-size: 200%;
+    animation: shimmer 3s linear infinite;
+  }
+  @keyframes shimmer { 0%{background-position:0%} 100%{background-position:200%} }
+  .qs-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.1rem; letter-spacing: .08em;
+    color: var(--accent); margin-bottom: 1rem;
+    display: flex; align-items: center; gap: .5rem;
+  }
+  .qs-row { display: flex; gap: .6rem; align-items: center; flex-wrap: wrap; }
+  .qs-type-btns { display: flex; gap: .35rem; flex-shrink: 0; }
+  .qs-type-btn {
+    font-family: 'DM Sans', sans-serif;
+    font-size: .75rem; font-weight: 700;
+    letter-spacing: .07em; text-transform: uppercase;
+    padding: .5rem .9rem;
+    border: 1px solid var(--border);
+    border-radius: 8px; background: var(--surface);
+    color: var(--muted); cursor: pointer;
+    transition: all .15s;
+  }
+  .qs-type-btn.active { background: rgba(245,166,35,.15); border-color: var(--accent); color: var(--accent); }
+  .qs-type-btn:hover:not(.active) { border-color: var(--muted); color: var(--text); }
+  .qs-input-wrap { position: relative; flex: 1; min-width: 220px; }
+  .qs-input-wrap input { padding-left: 2.4rem; font-size: .95rem; height: 42px; }
+  .qs-input-icon { position: absolute; left: .85rem; top: 50%; transform: translateY(-50%); font-size: .95rem; color: var(--muted); pointer-events: none; }
+  .qs-btn {
+    font-family: 'DM Sans', sans-serif;
+    font-size: .85rem; font-weight: 600;
+    padding: .55rem 1.2rem; border-radius: 8px;
+    border: none; cursor: pointer;
+    background: var(--accent); color: #0d0f14;
+    transition: all .15s; white-space: nowrap;
+    display: flex; align-items: center; gap: .4rem;
+  }
+  .qs-btn:hover { background: var(--accent2); transform: translateY(-1px); }
+
+  .qs-results { margin-top: 1rem; display: none; border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
+  .qs-results.open { display: block; }
+  .qs-result-item { display: flex; align-items: center; gap: .75rem; padding: .85rem 1rem; border-bottom: 1px solid var(--border); background: var(--surface); transition: background .12s; }
+  .qs-result-item:last-child { border-bottom: none; }
+  .qs-result-item:hover { background: var(--highlight); }
+  .qs-result-info { flex: 1; min-width: 0; }
+  .qs-result-name { font-weight: 600; font-size: .9rem; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .qs-result-meta { font-size: .74rem; color: var(--muted); font-family: 'DM Mono', monospace; margin-top: .15rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .qs-result-motivo { font-size: .65rem; background: rgba(245,166,35,.12); color: var(--accent); border: 1px solid rgba(245,166,35,.25); border-radius: 10px; padding: .1rem .45rem; margin-left: .4rem; }
+  .qs-action-btns { display: flex; gap: .5rem; flex-shrink: 0; }
+  .qs-btn-entrada {
+    font-size: .78rem; font-weight: 700; letter-spacing: .05em; padding: .4rem .85rem;
+    border-radius: 7px; border: 1px solid rgba(61,186,124,.35); cursor: pointer;
+    background: rgba(61,186,124,.15); color: var(--success); transition: all .15s; white-space: nowrap;
+  }
+  .qs-btn-entrada:hover { background: rgba(61,186,124,.3); transform: translateY(-1px); }
+  .qs-btn-saida {
+    font-size: .78rem; font-weight: 700; letter-spacing: .05em; padding: .4rem .85rem;
+    border-radius: 7px; border: 1px solid rgba(245,166,35,.3); cursor: pointer;
+    background: rgba(245,166,35,.12); color: var(--accent); transition: all .15s; white-space: nowrap;
+  }
+  .qs-btn-saida:hover { background: rgba(245,166,35,.25); transform: translateY(-1px); }
+  .qs-btn-saida:disabled, .qs-btn-entrada:disabled { opacity: .35; cursor: not-allowed; transform: none; }
+  .qs-no-results { padding: 1.25rem; text-align: center; color: var(--muted); font-size: .85rem; background: var(--surface); }
+  .qs-status-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; margin-left: .25rem; }
+  .qs-status-in  { background: var(--success); box-shadow: 0 0 6px var(--success); animation: pulse-g 2s infinite; }
+  .qs-status-out { background: var(--muted); }
+  @keyframes pulse-g { 0%,100%{opacity:1} 50%{opacity:.5} }
+
+  /* ══════════════════════════════
+     MONITOR AO VIVO
+  ══════════════════════════════ */
+  .monitor-header {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem;
+  }
+  .monitor-title-group { display: flex; align-items: center; gap: 1rem; }
+  .monitor-live-dot {
+    width: 12px; height: 12px; border-radius: 50%;
+    background: var(--success);
+    box-shadow: 0 0 10px var(--success);
+    animation: pulse-g 1.5s infinite;
+    flex-shrink: 0;
+  }
+  .monitor-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.6rem; letter-spacing: .06em; color: var(--text);
+  }
+  .monitor-count-badge {
+    background: rgba(61,186,124,.15);
+    color: var(--success);
+    border: 1px solid rgba(61,186,124,.3);
+    padding: .35rem .85rem;
+    border-radius: 20px;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.1rem;
+    letter-spacing: .08em;
+  }
+  .monitor-filter-bar { display: flex; gap: .6rem; align-items: center; flex-wrap: wrap; }
+  .monitor-search { position: relative; min-width: 220px; flex: 1; }
+  .monitor-search input { padding-left: 2.3rem; }
+  .monitor-search .search-icon { left: .75rem; }
+
+  .monitor-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1rem;
+    margin-top: 1rem;
+  }
+  .monitor-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1.25rem;
+    position: relative;
+    overflow: hidden;
+    transition: border-color .2s, box-shadow .2s;
+    animation: fadeIn .3s ease;
+  }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+  .monitor-card::before {
+    content: ''; position: absolute;
+    top: 0; left: 0; bottom: 0; width: 3px;
+    background: var(--success);
+  }
+  .monitor-card:hover { border-color: rgba(61,186,124,.4); box-shadow: 0 4px 20px rgba(61,186,124,.1); }
+  .monitor-card-header { display: flex; align-items: flex-start; justify-content: space-between; gap: .75rem; margin-bottom: .85rem; }
+  .monitor-avatar {
+    width: 42px; height: 42px; border-radius: 10px;
+    background: var(--highlight);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.2rem; flex-shrink: 0;
+    border: 1px solid var(--border);
+  }
+  .monitor-name-block { flex: 1; min-width: 0; }
+  .monitor-person-name { font-weight: 600; font-size: .95rem; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .monitor-person-sub { font-size: .75rem; color: var(--muted); margin-top: .15rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .monitor-time-badge {
+    background: rgba(245,166,35,.12);
+    border: 1px solid rgba(245,166,35,.3);
+    color: var(--accent);
+    border-radius: 8px;
+    padding: .3rem .6rem;
+    font-family: 'DM Mono', monospace;
+    font-size: .8rem;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+  .monitor-card-details { display: grid; grid-template-columns: 1fr 1fr; gap: .5rem .75rem; margin-bottom: 1rem; }
+  .monitor-detail { display: flex; flex-direction: column; gap: .15rem; }
+  .monitor-detail-label { font-size: .65rem; font-weight: 600; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
+  .monitor-detail-value { font-size: .82rem; color: var(--text); font-family: 'DM Mono', monospace; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .monitor-card-actions { display: flex; gap: .5rem; }
+  .monitor-btn-saida {
+    flex: 1; font-size: .8rem; font-weight: 700;
+    letter-spacing: .05em; padding: .5rem 1rem;
+    border-radius: 8px; border: 1px solid rgba(245,166,35,.35);
+    background: rgba(245,166,35,.1); color: var(--accent);
+    cursor: pointer; transition: all .15s;
+    display: flex; align-items: center; justify-content: center; gap: .4rem;
+  }
+  .monitor-btn-saida:hover { background: rgba(245,166,35,.25); transform: translateY(-1px); }
+  .monitor-btn-edit {
+    font-size: .8rem; font-weight: 600;
+    padding: .5rem .85rem;
+    border-radius: 8px; border: 1px solid var(--border);
+    background: transparent; color: var(--muted);
+    cursor: pointer; transition: all .15s;
+  }
+  .monitor-btn-edit:hover { border-color: var(--accent); color: var(--accent); }
+  .monitor-elapsed {
+    font-size: .72rem; color: var(--muted);
+    font-family: 'DM Mono', monospace;
+    margin-top: .5rem;
+  }
+  .monitor-elapsed span { color: var(--success); }
+  .monitor-empty {
+    grid-column: 1 / -1;
+    text-align: center; padding: 5rem 2rem;
+    color: var(--muted);
+  }
+  .monitor-empty-icon { font-size: 4rem; margin-bottom: 1rem; opacity: .3; }
+  .monitor-empty-text { font-size: 1rem; margin-bottom: .5rem; }
+  .monitor-empty-sub { font-size: .82rem; opacity: .6; }
+
+  /* ══════════════════════════════
+     ABA CONFIGURAÇÕES (Cargo/Função/Empresa)
+  ══════════════════════════════ */
+  .config-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 1.5rem;
+  }
+  .config-block {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+  }
+  .config-block-header {
+    padding: 1rem 1.25rem;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .config-block-title {
+    font-size: .78rem; font-weight: 600;
+    letter-spacing: .1em; text-transform: uppercase;
+    color: var(--accent);
+    display: flex; align-items: center; gap: .5rem;
+  }
+  .config-block-count {
+    font-size: .72rem; background: rgba(245,166,35,.12);
+    color: var(--accent); border: 1px solid rgba(245,166,35,.25);
+    border-radius: 10px; padding: .1rem .5rem;
+    font-family: 'DM Mono', monospace;
+  }
+  .config-add-row {
+    display: flex; gap: .5rem;
+    padding: 1rem 1.25rem;
+    border-bottom: 1px solid var(--border);
+  }
+  .config-add-row input { flex: 1; font-size: .85rem; }
+  .config-add-btn {
+    font-size: .82rem; font-weight: 600;
+    padding: .55rem 1rem; border-radius: 8px;
+    border: none; cursor: pointer;
+    background: var(--accent); color: #0d0f14;
+    transition: all .15s; white-space: nowrap;
+    flex-shrink: 0;
+  }
+  .config-add-btn:hover { background: var(--accent2); }
+  .config-list { max-height: 320px; overflow-y: auto; }
+  .config-item {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: .65rem 1.25rem;
+    border-bottom: 1px solid var(--border);
+    transition: background .12s;
+  }
+  .config-item:last-child { border-bottom: none; }
+  .config-item:hover { background: var(--highlight); }
+  .config-item-name { font-size: .88rem; color: var(--text); font-weight: 500; }
+  .config-item-del {
+    background: none; border: 1px solid transparent;
+    color: var(--muted); padding: .2rem .45rem;
+    border-radius: 5px; cursor: pointer; font-size: .8rem;
+    transition: all .15s;
+  }
+  .config-item-del:hover { border-color: var(--danger); color: var(--danger); }
+  .config-empty { padding: 2rem; text-align: center; color: var(--muted); font-size: .85rem; }
+
+  /* search-by-wrap */
+  .search-by-wrap { display: flex; gap: .5rem; align-items: center; flex: 1; min-width: 260px; }
+  .search-by-select { flex: 0 0 auto; min-width: 110px; font-size: .8rem; padding: .55rem .7rem; }
+
+  /* ── Responsive ── */
+  @media (max-width: 700px) {
+    header { padding: 0 .75rem; }
+    .logo-text { font-size: 1.1rem; }
+    .header-search-wrap { max-width: 160px; }
+    #live-clock { display: none; }
+    main { padding: 0 .75rem 4rem; }
+    .form-grid { grid-template-columns: 1fr; }
+    .form-group.half { grid-column: span 1; }
+    .monitor-card-details { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<!-- Loading Overlay -->
+<div id="loading-overlay">
+  <div class="loading-spinner"></div>
+  <div class="loading-text">Conectando ao Banco de Dados...</div>
+</div>
+
+<!-- ══ HEADER ══ -->
+<header>
+  <div class="logo">
+    <div class="logo-icon">🔐</div>
+    <div>
+      <div class="logo-text">CONTROLE DE <span>ACESSO</span></div>
+    </div>
+  </div>
+
+  <!-- BUSCA GLOBAL HEADER -->
+  <div class="header-search-wrap">
+    <span class="header-search-icon">🔍</span>
+    <input
+      type="text"
+      class="header-search-input"
+      id="header-search"
+      placeholder="Buscar por nome, RG ou CPF..."
+      autocomplete="off"
+      oninput="globalSearch(this.value)"
+      onkeydown="globalSearchKeyNav(event)"
+    >
+    <div class="header-search-dropdown" id="header-search-dropdown"></div>
+  </div>
+
+  <div class="header-right">
+    <div id="live-clock">--:--:--</div>
+    <div class="badge-status" id="conn-badge">● Conectando...</div>
+  </div>
+</header>
+
+<!-- ══ MAIN ══ -->
+<main>
+  <!-- Tabs -->
+  <div class="tabs">
+    <button class="tab-btn active" onclick="switchTab('cadastro', this)">
+      📋 Primeiro Cadastro
+      <span class="tab-count" id="cnt-cadastro">0</span>
+    </button>
+    <button class="tab-btn" onclick="switchTab('dados', this)">
+      📊 Registro de Acessos
+      <span class="tab-count" id="cnt-dados">0</span>
+    </button>
+    <button class="tab-btn" onclick="switchTab('monitor', this)">
+      📡 Monitor ao Vivo
+      <span class="tab-count" id="cnt-monitor" style="background:rgba(61,186,124,.15);color:var(--success);">0</span>
+    </button>
+    <button class="tab-btn" onclick="switchTab('config', this)">
+      ⚙️ Configurações
+    </button>
+  </div>
+
+  <!-- ══ ABA 1: PRIMEIRO CADASTRO ══ -->
+  <div id="panel-cadastro" class="tab-panel active">
+    <div class="stats-row" id="stats-cadastro"></div>
+    <div class="form-card">
+      <div class="form-card-title">➕ Novo Cadastro de Visitante</div>
+      <div class="form-grid">
+        <div class="form-group half">
+          <label>Nome Completo <span class="req">*</span></label>
+          <input type="text" id="c-nome" placeholder="Nome do visitante" autocomplete="off">
+        </div>
+        <div class="form-group">
+          <label>RG</label>
+          <input type="text" id="c-rg" placeholder="00.000.000-0">
+        </div>
+        <div class="form-group">
+          <label>CPF</label>
+          <input type="text" id="c-cpf" placeholder="000.000.000-00">
+        </div>
+        <div class="form-group half">
+          <label>Cargo / Função</label>
+          <select id="c-cargo">
+            <option value="">Selecione o cargo...</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Empresa</label>
+          <select id="c-empresa">
+            <option value="">Selecione a empresa...</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Motivo de Entrada <span class="req">*</span></label>
+          <select id="c-motivo">
+            <option value="">Selecione...</option>
+            <option>PRESTADOR</option><option>ENTREGA</option><option>COLETA</option>
+            <option>VISITANTE</option><option>DESCARGA</option><option>ENTREVISTA</option>
+            <option>MANUTENÇÃO</option><option>FUNCIONÁRIO</option><option>OUTRO</option>
+          </select>
+        </div>
+      </div>
+      <div class="btn-row">
+        <button class="btn btn-primary" id="btn-save-cadastro" onclick="addCadastro()">💾 Salvar Cadastro</button>
+        <button class="btn btn-outline" onclick="clearForm('c')">✕ Limpar</button>
+      </div>
+    </div>
+
+    <div class="filter-bar">
+      <div class="search-wrap">
+        <span class="search-icon">🔍</span>
+        <input type="text" placeholder="Buscar por nome, CPF, empresa..." oninput="filterTable('cadastro')" id="search-cadastro">
+      </div>
+      <select class="filter-select" onchange="filterTable('cadastro')" id="filt-motivo">
+        <option value="">Todos os motivos</option>
+        <option>PRESTADOR</option><option>ENTREGA</option><option>COLETA</option>
+        <option>VISITANTE</option><option>DESCARGA</option><option>ENTREVISTA</option>
+        <option>MANUTENÇÃO</option><option>FUNCIONÁRIO</option><option>OUTRO</option>
+      </select>
+      <select class="filter-select" onchange="filterTable('cadastro')" id="filt-empresa-cad">
+        <option value="">Todas as empresas</option>
+      </select>
+      <button class="btn btn-outline" onclick="exportCSV('cadastro')">⬇ Exportar CSV</button>
+    </div>
+
+    <div class="table-wrap">
+      <table id="tbl-cadastro">
+        <thead>
+          <tr>
+            <th onclick="sortTable('cadastro',0)">Nome <span class="sort-icon">↕</span></th>
+            <th onclick="sortTable('cadastro',1)">RG <span class="sort-icon">↕</span></th>
+            <th onclick="sortTable('cadastro',2)">CPF <span class="sort-icon">↕</span></th>
+            <th onclick="sortTable('cadastro',3)">Cargo / Função <span class="sort-icon">↕</span></th>
+            <th onclick="sortTable('cadastro',4)">Empresa <span class="sort-icon">↕</span></th>
+            <th onclick="sortTable('cadastro',5)">Motivo Entrada <span class="sort-icon">↕</span></th>
+            <th>Ações</th>
+          </tr>
+        </thead>
+        <tbody id="tbody-cadastro"></tbody>
+      </table>
+    </div>
+    <div class="pagination" id="pg-cadastro"></div>
+  </div>
+
+  <!-- ══ ABA 2: REGISTRO DE ACESSOS ══ -->
+  <div id="panel-dados" class="tab-panel">
+    <div class="stats-row" id="stats-dados"></div>
+
+    <!-- PAINEL DE BUSCA RÁPIDA -->
+    <div class="quick-search-panel">
+      <div class="qs-title">⚡ Busca Rápida por Cadastro</div>
+      <div class="qs-row">
+        <div class="qs-type-btns">
+          <button class="qs-type-btn active" onclick="setQsType('nome',this)">Nome</button>
+          <button class="qs-type-btn" onclick="setQsType('rg',this)">RG</button>
+          <button class="qs-type-btn" onclick="setQsType('cpf',this)">CPF</button>
+        </div>
+        <div class="qs-input-wrap">
+          <span class="qs-input-icon">🔍</span>
+          <input type="text" id="qs-input" placeholder="Digite para buscar no cadastro..."
+            oninput="qsSearch()" onkeydown="if(event.key==='Enter') qsSearch()" autocomplete="off">
+        </div>
+        <button class="qs-btn" onclick="qsSearch()">🔎 Buscar</button>
+      </div>
+      <div class="qs-results" id="qs-results"></div>
+    </div>
+
+    <div class="form-card">
+      <div class="form-card-title">🚗 Registrar Novo Acesso</div>
+      <div class="form-grid">
+        <div class="form-group">
+          <label>Data <span class="req">*</span></label>
+          <input type="date" id="d-data">
+        </div>
+        <div class="form-group">
+          <label>Placa do Veículo</label>
+          <input type="text" id="d-placa" placeholder="Ex: ABC-1234" maxlength="10" oninput="this.value=this.value.toUpperCase()">
+        </div>
+        <div class="form-group">
+          <label>Placa do Trailer <span style="font-size:.65rem;color:var(--muted);font-weight:400;text-transform:none;">(quando aplicável)</span></label>
+          <div class="trailer-wrap">
+            <input type="text" id="d-placa-trailer" placeholder="Ex: XYZ-5678" maxlength="10" oninput="this.value=this.value.toUpperCase()">
+            <span class="trailer-label-tag">Trailer</span>
+          </div>
+        </div>
+        <div class="form-group half" style="position:relative;">
+          <label>Nome Completo <span class="req">*</span></label>
+          <div class="autocomplete-wrap">
+            <input type="text" id="d-nome" placeholder="Digite ou busque pelo cadastro..." autocomplete="off"
+              oninput="acSearch(this.value)" onkeydown="acKeyNav(event)" onfocus="acSearch(this.value)">
+            <div class="autocomplete-list" id="ac-list"></div>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>RG</label>
+          <input type="text" id="d-rg" placeholder="00.000.000-0">
+        </div>
+        <div class="form-group">
+          <label>CPF</label>
+          <input type="text" id="d-cpf" placeholder="000.000.000-00">
+        </div>
+        <div class="form-group">
+          <label>Cargo / Função</label>
+          <select id="d-cargo">
+            <option value="">Selecione o cargo...</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Empresa</label>
+          <select id="d-empresa">
+            <option value="">Selecione a empresa...</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Horário de Entrada</label>
+          <input type="time" id="d-entrada">
+        </div>
+        <div class="form-group">
+          <label>Horário de Saída</label>
+          <input type="time" id="d-saida">
+        </div>
+      </div>
+      <div class="btn-row">
+        <button class="btn btn-primary" id="btn-save-dados" onclick="addDado()">✅ Registrar Acesso</button>
+        <button class="btn btn-outline" onclick="clearForm('d')">✕ Limpar</button>
+      </div>
+    </div>
+
+    <div class="filter-bar">
+      <div class="search-by-wrap">
+        <select class="filter-select search-by-select" id="search-by-dados" onchange="filterTable('dados')">
+          <option value="all">🔍 Tudo</option>
+          <option value="nome">Nome</option>
+          <option value="rg">RG</option>
+          <option value="cpf">CPF</option>
+          <option value="placa">Placa</option>
+        </select>
+        <div class="search-wrap" style="flex:1;">
+          <span class="search-icon">🔍</span>
+          <input type="text" placeholder="Buscar por nome, RG, CPF, placa..." oninput="filterTable('dados')" id="search-dados">
+        </div>
+      </div>
+      <select class="filter-select" onchange="filterTable('dados')" id="filt-empresa-dados">
+        <option value="">Todas as empresas</option>
+      </select>
+      <select class="filter-select" onchange="filterTable('dados')" id="filt-cargo-dados">
+        <option value="">Todos os cargos</option>
+      </select>
+      <input type="date" id="filt-data-inicio" onchange="filterTable('dados')" title="Data inicial" style="flex:0 0 auto;min-width:140px;">
+      <input type="date" id="filt-data-fim" onchange="filterTable('dados')" title="Data final" style="flex:0 0 auto;min-width:140px;">
+      <button class="btn btn-outline" onclick="exportCSV('dados')">⬇ Exportar CSV</button>
+    </div>
+
+    <div class="table-wrap">
+      <table id="tbl-dados">
+        <thead>
+          <tr>
+            <th onclick="sortTable('dados',0)">Data <span class="sort-icon">↕</span></th>
+            <th onclick="sortTable('dados',1)">Placa <span class="sort-icon">↕</span></th>
+            <th onclick="sortTable('dados',2)">Trailer <span class="sort-icon">↕</span></th>
+            <th onclick="sortTable('dados',3)">Nome <span class="sort-icon">↕</span></th>
+            <th onclick="sortTable('dados',4)">RG <span class="sort-icon">↕</span></th>
+            <th onclick="sortTable('dados',5)">CPF <span class="sort-icon">↕</span></th>
+            <th onclick="sortTable('dados',6)">Cargo <span class="sort-icon">↕</span></th>
+            <th onclick="sortTable('dados',7)">Empresa <span class="sort-icon">↕</span></th>
+            <th onclick="sortTable('dados',8)">Entrada <span class="sort-icon">↕</span></th>
+            <th onclick="sortTable('dados',9)">Saída <span class="sort-icon">↕</span></th>
+            <th>Status</th>
+            <th>Ações</th>
+          </tr>
+        </thead>
+        <tbody id="tbody-dados"></tbody>
+      </table>
+    </div>
+    <div class="pagination" id="pg-dados"></div>
+  </div>
+
+  <!-- ══ ABA 3: MONITOR AO VIVO ══ -->
+  <div id="panel-monitor" class="tab-panel">
+    <div class="monitor-header">
+      <div class="monitor-title-group">
+        <div class="monitor-live-dot"></div>
+        <div>
+          <div class="monitor-title">Monitor ao Vivo</div>
+          <div class="section-sub">Pessoas atualmente dentro das instalações</div>
+        </div>
+      </div>
+      <div style="display:flex;align-items:center;gap:.75rem;flex-wrap:wrap;">
+        <div class="monitor-count-badge" id="monitor-count-badge">0 dentro</div>
+        <button class="btn btn-outline" onclick="renderMonitor()" style="font-size:.8rem;padding:.5rem 1rem;">🔄 Atualizar</button>
+        <button class="btn btn-danger" onclick="confirmSaidaTodos()" style="font-size:.8rem;padding:.5rem 1rem;" id="btn-saida-todos">🚪 Registrar Saída Geral</button>
+      </div>
+    </div>
+
+    <div class="filter-bar">
+      <div class="monitor-search search-wrap" style="flex:1;min-width:200px;">
+        <span class="search-icon">🔍</span>
+        <input type="text" id="monitor-search" placeholder="Filtrar por nome, empresa, cargo..." oninput="renderMonitor()">
+      </div>
+      <select class="filter-select" id="monitor-filt-empresa" onchange="renderMonitor()">
+        <option value="">Todas as empresas</option>
+      </select>
+      <select class="filter-select" id="monitor-filt-cargo" onchange="renderMonitor()">
+        <option value="">Todos os cargos</option>
+      </select>
+    </div>
+
+    <div class="monitor-grid" id="monitor-grid">
+      <div class="monitor-empty">
+        <div class="monitor-empty-icon">📡</div>
+        <div class="monitor-empty-text">Carregando dados...</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ ABA 4: CONFIGURAÇÕES ══ -->
+  <div id="panel-config" class="tab-panel">
+    <div class="section-header">
+      <div>
+        <div class="section-title">⚙️ <span>Configurações</span></div>
+        <div class="section-sub">Gerencie as listas suspensas usadas em todo o sistema</div>
+      </div>
+    </div>
+
+    <div class="config-grid">
+      <!-- CARGOS -->
+      <div class="config-block">
+        <div class="config-block-header">
+          <div class="config-block-title">💼 Cargos / Funções</div>
+          <span class="config-block-count" id="cnt-cargos">0</span>
+        </div>
+        <div class="config-add-row">
+          <input type="text" id="new-cargo" placeholder="Novo cargo ou função..." maxlength="60"
+            onkeydown="if(event.key==='Enter') addConfigItem('cargo')">
+          <button class="config-add-btn" onclick="addConfigItem('cargo')">+ Adicionar</button>
+        </div>
+        <div class="config-list" id="list-cargo">
+          <div class="config-empty">Nenhum cargo cadastrado.</div>
+        </div>
+      </div>
+
+      <!-- EMPRESAS -->
+      <div class="config-block">
+        <div class="config-block-header">
+          <div class="config-block-title">🏢 Empresas</div>
+          <span class="config-block-count" id="cnt-empresas">0</span>
+        </div>
+        <div class="config-add-row">
+          <input type="text" id="new-empresa" placeholder="Nome da empresa..." maxlength="80"
+            onkeydown="if(event.key==='Enter') addConfigItem('empresa')">
+          <button class="config-add-btn" onclick="addConfigItem('empresa')">+ Adicionar</button>
+        </div>
+        <div class="config-list" id="list-empresa">
+          <div class="config-empty">Nenhuma empresa cadastrada.</div>
+        </div>
+      </div>
+
+      <!-- FUNÇÕES (alias de cargo, separado para flexibilidade) -->
+      <div class="config-block">
+        <div class="config-block-header">
+          <div class="config-block-title">🔧 Funções Específicas</div>
+          <span class="config-block-count" id="cnt-funcoes">0</span>
+        </div>
+        <div class="config-add-row">
+          <input type="text" id="new-funcao" placeholder="Nova função específica..." maxlength="60"
+            onkeydown="if(event.key==='Enter') addConfigItem('funcao')">
+          <button class="config-add-btn" onclick="addConfigItem('funcao')">+ Adicionar</button>
+        </div>
+        <div class="config-list" id="list-funcao">
+          <div class="config-empty">Nenhuma função cadastrada.</div>
+        </div>
+        <div style="padding:.75rem 1.25rem;background:rgba(74,158,255,.06);border-top:1px solid var(--border);">
+          <div style="font-size:.72rem;color:var(--muted);line-height:1.5;">
+            💡 As <strong style="color:var(--info);">Funções Específicas</strong> são combinadas com os <strong style="color:var(--accent);">Cargos</strong> para compor a lista suspensa nos formulários.
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PREVIEW DAS LISTAS -->
+    <div class="form-card" style="margin-top:2rem;">
+      <div class="form-card-title">👁 Preview das Listas Suspensas</div>
+      <div class="form-grid">
+        <div class="form-group">
+          <label>Cargo / Função (preview)</label>
+          <select id="preview-cargo"><option value="">Selecione...</option></select>
+        </div>
+        <div class="form-group">
+          <label>Empresa (preview)</label>
+          <select id="preview-empresa"><option value="">Selecione...</option></select>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<!-- ══ MODAL (edit) ══ -->
+<div class="modal-overlay" id="modal-overlay">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal()">✕</button>
+    <div class="modal-title" id="modal-title">Editar Registro</div>
+    <div id="modal-body"></div>
+    <div class="btn-row">
+      <button class="btn btn-primary" id="modal-save-btn">💾 Salvar</button>
+      <button class="btn btn-outline" onclick="closeModal()">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ TOAST ══ -->
+<div id="toast"></div>
+
+<script>
+// ═══════════════════════════════════════════════════════════════
+// FIREBASE CONFIG
+// ═══════════════════════════════════════════════════════════════
+const firebaseConfig = {
+  apiKey:            "AIzaSyC9KuwYjmT5Jgc0YCUdOO_DNyzlpvIeoF8",
+  authDomain:        "controle-de-acesso-3-0.firebaseapp.com",
+  projectId:         "controle-de-acesso-3-0",
+  storageBucket:     "controle-de-acesso-3-0.firebasestorage.app",
+  messagingSenderId: "577925992628",
+  appId:             "1:577925992628:web:b756b9192dbeed2e74c7e1"
+};
+
+firebase.initializeApp(firebaseConfig);
+const db_fire = firebase.firestore();
+
+// ═══════════════════════════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════════════════════════
+let db = { cadastro: [], dados: [], cargo: [], empresa: [], funcao: [] };
+let filtered = { cadastro: [], dados: [] };
+let sortState = { cadastro: { col: -1, asc: true }, dados: { col: -1, asc: true } };
+const PAGE_SIZE = 12;
+let pages = { cadastro: 1, dados: 1 };
+let editContext = null;
+let unsubscribers = {};
+let monitorInterval = null;
+
+// ═══════════════════════════════════════════════════════════════
+// FIREBASE — REAL-TIME LISTENERS
+// ═══════════════════════════════════════════════════════════════
+const PLACEHOLDER = 'COLE_SUA_API_KEY_AQUI';
+
+function isConfigured() {
+  return firebaseConfig.apiKey && firebaseConfig.apiKey !== PLACEHOLDER && firebaseConfig.projectId;
+}
+
+function showConfigWarning() {
+  const overlay = document.getElementById('loading-overlay');
+  overlay.innerHTML = `
+    <div style="text-align:center;max-width:480px;padding:2rem;">
+      <div style="font-size:3rem;margin-bottom:1rem;">⚙️</div>
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:1.6rem;letter-spacing:.1em;color:#f5a623;margin-bottom:.75rem;">
+        CONFIGURAÇÃO NECESSÁRIA
+      </div>
+      <div style="color:#7a8099;font-size:.9rem;line-height:1.6;margin-bottom:1.5rem;">
+        O Firebase ainda não está configurado.<br>
+        Abra o arquivo <code style="background:#252b3a;padding:.2rem .5rem;border-radius:4px;color:#e8eaf0;">index.html</code>
+        e substitua o bloco <code style="background:#252b3a;padding:.2rem .5rem;border-radius:4px;color:#e8eaf0;">firebaseConfig</code>
+        com as credenciais do seu projeto Firebase.
+      </div>
+    </div>`;
+}
+
+function hideLoading() {
+  document.getElementById('loading-overlay').classList.add('hidden');
+}
+
+function initFirebase() {
+  if (!isConfigured()) {
+    showConfigWarning();
+    filterTable('cadastro');
+    filterTable('dados');
+    renderStats('cadastro');
+    renderStats('dados');
+    renderMonitor();
+    return;
+  }
+
+  setTimeout(hideLoading, 8000);
+
+  unsubscribers.cadastro = db_fire.collection('cadastro')
+    .orderBy('_createdAt', 'asc')
+    .onSnapshot(snapshot => {
+      db.cadastro = snapshot.docs.map(doc => ({ _id: doc.id, ...doc.data() }));
+      filterTable('cadastro');
+      renderStats('cadastro');
+    }, err => { console.error(err); setOffline(); });
+
+  unsubscribers.dados = db_fire.collection('dados')
+    .orderBy('_createdAt', 'asc')
+    .onSnapshot(snapshot => {
+      db.dados = snapshot.docs.map(doc => ({ _id: doc.id, ...doc.data() }));
+      filterTable('dados');
+      renderStats('dados');
+      renderMonitor();
+      hideLoading();
+      setOnline();
+    }, err => { console.error(err); setOffline(); });
+
+  // Config collections
+  ['cargo','empresa','funcao'].forEach(col => {
+    unsubscribers[col] = db_fire.collection('config_' + col)
+      .orderBy('nome', 'asc')
+      .onSnapshot(snapshot => {
+        db[col] = snapshot.docs.map(doc => ({ _id: doc.id, ...doc.data() }));
+        renderConfigList(col);
+        refreshAllDropdowns();
+      }, err => console.error(col, err));
+  });
+}
+
+function setOnline() {
+  const badge = document.getElementById('conn-badge');
+  badge.textContent = '● Sistema Ativo';
+  badge.className = 'badge-status';
+}
+function setOffline() {
+  const badge = document.getElementById('conn-badge');
+  badge.textContent = '⚠ Sem Conexão';
+  badge.className = 'badge-status offline';
+  hideLoading();
+}
+
+async function addToFirestore(collection, data) {
+  data._createdAt = firebase.firestore.FieldValue.serverTimestamp();
+  const ref = await db_fire.collection(collection).add(data);
+  return ref.id;
+}
+async function updateInFirestore(collection, id, data) {
+  await db_fire.collection(collection).doc(id).update(data);
+}
+async function deleteFromFirestore(collection, id) {
+  await db_fire.collection(collection).doc(id).delete();
+}
+
+// ═══════════════════════════════════════════════════════════════
+// CLOCK
+// ═══════════════════════════════════════════════════════════════
+function updateClock() {
+  const now = new Date();
+  document.getElementById('live-clock').textContent =
+    now.toLocaleTimeString('pt-BR', { hour:'2-digit', minute:'2-digit', second:'2-digit' }) +
+    ' — ' + now.toLocaleDateString('pt-BR', { weekday:'short', day:'2-digit', month:'2-digit' });
+}
+setInterval(updateClock, 1000);
+updateClock();
+document.getElementById('d-data').value = new Date().toISOString().split('T')[0];
+
+// ═══════════════════════════════════════════════════════════════
+// TABS
+// ═══════════════════════════════════════════════════════════════
+function switchTab(name, btn) {
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('panel-' + name).classList.add('active');
+  if (name === 'monitor') renderMonitor();
+  if (name === 'config') renderAllConfigLists();
+}
+
+// ═══════════════════════════════════════════════════════════════
+// TOAST
+// ═══════════════════════════════════════════════════════════════
+function showToast(msg, type = 'success') {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = type === 'error' ? 'error show' : 'show';
+  setTimeout(() => { t.className = type === 'error' ? 'error' : ''; }, 3000);
+}
+
+// ═══════════════════════════════════════════════════════════════
+// CONFIG — Cargo / Empresa / Função
+// ═══════════════════════════════════════════════════════════════
+async function addConfigItem(tipo) {
+  const input = document.getElementById('new-' + tipo);
+  const val = input.value.trim().toUpperCase();
+  if (!val) { showToast('Digite um valor.', 'error'); return; }
+  const exists = db[tipo].some(x => x.nome.toUpperCase() === val);
+  if (exists) { showToast('Já cadastrado!', 'error'); return; }
+  try {
+    await addToFirestore('config_' + tipo, { nome: val });
+    input.value = '';
+    showToast(`✅ ${tipo === 'cargo' ? 'Cargo' : tipo === 'empresa' ? 'Empresa' : 'Função'} adicionado!`);
+  } catch(e) {
+    showToast('❌ Erro: ' + e.message, 'error');
+  }
+}
+
+async function deleteConfigItem(tipo, id) {
+  if (!confirm('Excluir este item?')) return;
+  try {
+    await deleteFromFirestore('config_' + tipo, id);
+    showToast('Removido.');
+  } catch(e) {
+    showToast('❌ Erro: ' + e.message, 'error');
+  }
+}
+
+function renderConfigList(tipo) {
+  const list = document.getElementById('list-' + tipo);
+  const items = db[tipo];
+  const countEl = document.getElementById('cnt-' + (tipo === 'cargo' ? 'cargos' : tipo === 'empresa' ? 'empresas' : 'funcoes'));
+  if (countEl) countEl.textContent = items.length;
+
+  if (!items.length) {
+    list.innerHTML = `<div class="config-empty">Nenhum item cadastrado.</div>`;
+    return;
+  }
+  list.innerHTML = items.map(item => `
+    <div class="config-item">
+      <span class="config-item-name">${item.nome}</span>
+      <button class="config-item-del" onclick="deleteConfigItem('${tipo}','${item._id}')" title="Excluir">✕</button>
+    </div>`).join('');
+}
+
+function renderAllConfigLists() {
+  ['cargo','empresa','funcao'].forEach(renderConfigList);
+}
+
+// Build combined cargo+funcao list for dropdowns
+function getCargoOptions() {
+  const cargos = db.cargo.map(x => x.nome);
+  const funcoes = db.funcao.map(x => x.nome);
+  return [...new Set([...cargos, ...funcoes])].sort();
+}
+
+function refreshAllDropdowns() {
+  const cargoOpts = getCargoOptions();
+  const empresaOpts = db.empresa.map(x => x.nome).sort();
+
+  // Helper to update a <select> keeping current value
+  function updateSelect(id, opts, placeholder) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    const cur = el.value;
+    el.innerHTML = `<option value="">${placeholder}</option>` +
+      opts.map(o => `<option value="${o}" ${o === cur ? 'selected' : ''}>${o}</option>`).join('');
+  }
+
+  updateSelect('c-cargo', cargoOpts, 'Selecione o cargo...');
+  updateSelect('c-empresa', empresaOpts, 'Selecione a empresa...');
+  updateSelect('d-cargo', cargoOpts, 'Selecione o cargo...');
+  updateSelect('d-empresa', empresaOpts, 'Selecione a empresa...');
+  updateSelect('preview-cargo', cargoOpts, 'Selecione...');
+  updateSelect('preview-empresa', empresaOpts, 'Selecione...');
+
+  // Filter dropdowns
+  updateSelect('filt-empresa-cad', empresaOpts, 'Todas as empresas');
+  updateSelect('filt-empresa-dados', empresaOpts, 'Todas as empresas');
+  updateSelect('filt-cargo-dados', cargoOpts, 'Todos os cargos');
+  updateSelect('monitor-filt-empresa', empresaOpts, 'Todas as empresas');
+  updateSelect('monitor-filt-cargo', cargoOpts, 'Todos os cargos');
+
+  // Also update modal dropdowns if open
+  const mCargo = document.getElementById('m-cargo-sel');
+  if (mCargo) { const cv = mCargo.value; mCargo.innerHTML = `<option value="">Selecione...</option>` + cargoOpts.map(o => `<option ${o===cv?'selected':''}>${o}</option>`).join(''); }
+  const mEmp = document.getElementById('m-empresa-sel');
+  if (mEmp) { const ev = mEmp.value; mEmp.innerHTML = `<option value="">Selecione...</option>` + empresaOpts.map(o => `<option ${o===ev?'selected':''}>${o}</option>`).join(''); }
+
+  // Preview config lists
+  renderConfigList('cargo');
+  renderConfigList('empresa');
+  renderConfigList('funcao');
+}
+
+// ═══════════════════════════════════════════════════════════════
+// GLOBAL HEADER SEARCH
+// ═══════════════════════════════════════════════════════════════
+let globalHighlight = -1;
+
+function globalSearch(val) {
+  const dd = document.getElementById('header-search-dropdown');
+  const q = val.trim().toLowerCase();
+  if (!q || q.length < 2) { dd.classList.remove('open'); dd.innerHTML = ''; return; }
+
+  const results = db.cadastro.filter(r =>
+    (r.nome||'').toLowerCase().includes(q) ||
+    (r.rg||'').toLowerCase().includes(q) ||
+    (r.cpf||'').toLowerCase().replace(/\D/g,'').includes(q.replace(/\D/g,''))
+  ).slice(0, 10);
+
+  globalHighlight = -1;
+
+  if (!results.length) {
+    dd.innerHTML = `<div class="hsd-no-results">Nenhum cadastro encontrado para "${val}"</div>`;
+    dd.classList.add('open');
+    return;
+  }
+
+  const hoje = todayStr();
+
+  dd.innerHTML = results.map((r, i) => {
+    const accessToday = db.dados.filter(d =>
+      (d.nome||'').toUpperCase() === (r.nome||'').toUpperCase() && d.data === hoje
+    ).sort((a,b) => (b._createdAt?.seconds||0) - (a._createdAt?.seconds||0));
+    const last = accessToday[0];
+    const isDentro = last && last.entrada && !last.saida;
+
+    return `
+    <div class="hsd-item" data-idx="${i}">
+      <div class="hsd-dot ${isDentro ? 'hsd-dot-in' : 'hsd-dot-out'}"></div>
+      <div class="hsd-info">
+        <div class="hsd-name">${r.nome} ${isDentro ? '<span style="color:var(--success);font-size:.7rem;">● DENTRO</span>' : ''}</div>
+        <div class="hsd-meta">${[r.rg ? 'RG: '+r.rg : '', r.cpf ? 'CPF: '+r.cpf : '', r.cargo||'', r.empresa||''].filter(Boolean).join(' · ')}</div>
+      </div>
+      <div class="hsd-actions">
+        <button class="hsd-btn-in" ${isDentro ? 'disabled' : ''} onclick="globalRegEntrada('${r._id}',event)">🟢 Entrada</button>
+        <button class="hsd-btn-out" ${!isDentro ? 'disabled' : ''} onclick="globalRegSaida('${last?last._id:''}',event)">🚪 Saída</button>
+      </div>
+    </div>`;
+  }).join('');
+  dd._results = results;
+  dd.classList.add('open');
+}
+
+async function globalRegEntrada(cadastroId, e) {
+  e.stopPropagation();
+  const r = db.cadastro.find(x => x._id === cadastroId);
+  if (!r) return;
+  const now = new Date();
+  const hoje = todayStr();
+  const entrada = now.toTimeString().slice(0,5);
+  try {
+    await addToFirestore('dados', {
+      data: hoje, nome: r.nome, rg: r.rg||'', cpf: r.cpf||'',
+      cargo: r.cargo||'', empresa: r.empresa||'',
+      placa: '', placaTrailer: '', entrada, saida: '',
+    });
+    showToast(`🟢 Entrada de ${r.nome.split(' ')[0]} registrada: ${entrada}`);
+    setTimeout(() => globalSearch(document.getElementById('header-search').value), 500);
+  } catch(err) { showToast('❌ Erro: ' + err.message, 'error'); }
+}
+
+async function globalRegSaida(dadoId, e) {
+  e.stopPropagation();
+  if (!dadoId) { showToast('Nenhum acesso aberto.', 'error'); return; }
+  const r = db.dados.find(x => x._id === dadoId);
+  if (!r || r.saida) { showToast('Saída já registrada.', 'error'); return; }
+  const saida = new Date().toTimeString().slice(0,5);
+  try {
+    await updateInFirestore('dados', dadoId, { saida });
+    showToast(`🚪 Saída de ${r.nome.split(' ')[0]} registrada: ${saida}`);
+    setTimeout(() => globalSearch(document.getElementById('header-search').value), 500);
+  } catch(err) { showToast('❌ Erro: ' + err.message, 'error'); }
+}
+
+function globalSearchKeyNav(e) {
+  const dd = document.getElementById('header-search-dropdown');
+  if (!dd.classList.contains('open')) return;
+  const items = dd.querySelectorAll('.hsd-item');
+  if (e.key === 'ArrowDown') { e.preventDefault(); globalHighlight = Math.min(globalHighlight+1, items.length-1); }
+  else if (e.key === 'ArrowUp') { e.preventDefault(); globalHighlight = Math.max(globalHighlight-1, -1); }
+  else if (e.key === 'Escape') { dd.classList.remove('open'); return; }
+  items.forEach((el,i) => el.style.background = i === globalHighlight ? 'var(--highlight)' : '');
+}
+
+document.addEventListener('mousedown', function(e) {
+  const wrap = document.querySelector('.header-search-wrap');
+  if (wrap && !wrap.contains(e.target)) {
+    document.getElementById('header-search-dropdown').classList.remove('open');
+  }
+});
+
+// ═══════════════════════════════════════════════════════════════
+// MONITOR AO VIVO
+// ═══════════════════════════════════════════════════════════════
+function todayStr() {
+  return new Date().toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit',year:'numeric'}).replace(/\//g,'/');
+}
+
+function getWithinNow() {
+  const hoje = todayStr();
+  return db.dados.filter(r => r.data === hoje && r.entrada && !r.saida);
+}
+
+function elapsedTime(timeStr) {
+  if (!timeStr) return '';
+  const [h, m] = timeStr.split(':').map(Number);
+  const now = new Date();
+  const entered = new Date(now.getFullYear(), now.getMonth(), now.getDate(), h, m, 0);
+  const diff = Math.max(0, Math.floor((now - entered) / 60000));
+  if (diff < 60) return `${diff}min`;
+  const hrs = Math.floor(diff / 60);
+  const mins = diff % 60;
+  return `${hrs}h${mins > 0 ? mins + 'min' : ''}`;
+}
+
+function personEmoji(cargo) {
+  const c = (cargo||'').toUpperCase();
+  if (c.includes('MOTORISTA') || c.includes('CHOFER')) return '🚛';
+  if (c.includes('TÉCNICO') || c.includes('TECNICO') || c.includes('MANUTENÇÃO')) return '🔧';
+  if (c.includes('VISITANTE')) return '👤';
+  if (c.includes('FUNCIONÁRIO') || c.includes('FUNCIONARIO')) return '👷';
+  if (c.includes('PRESTADOR')) return '🛠️';
+  if (c.includes('ENTREGADOR') || c.includes('ENTREGA')) return '📦';
+  return '🪪';
+}
+
+function renderMonitor() {
+  const grid = document.getElementById('monitor-grid');
+  const q = (document.getElementById('monitor-search')||{value:''}).value.toLowerCase();
+  const filtEmp = (document.getElementById('monitor-filt-empresa')||{value:''}).value;
+  const filtCargo = (document.getElementById('monitor-filt-cargo')||{value:''}).value;
+
+  let dentro = getWithinNow();
+
+  if (q) {
+    dentro = dentro.filter(r =>
+      (r.nome||'').toLowerCase().includes(q) ||
+      (r.empresa||'').toLowerCase().includes(q) ||
+      (r.cargo||'').toLowerCase().includes(q) ||
+      (r.rg||'').toLowerCase().includes(q)
+    );
+  }
+  if (filtEmp) dentro = dentro.filter(r => (r.empresa||'').toUpperCase() === filtEmp.toUpperCase());
+  if (filtCargo) dentro = dentro.filter(r => (r.cargo||'').toUpperCase() === filtCargo.toUpperCase());
+
+  // Sort by entry time
+  dentro.sort((a,b) => (a.entrada||'').localeCompare(b.entrada||''));
+
+  const total = getWithinNow().length;
+  const badge = document.getElementById('monitor-count-badge');
+  if (badge) badge.textContent = `${total} dentro`;
+  const cntEl = document.getElementById('cnt-monitor');
+  if (cntEl) cntEl.textContent = total;
+
+  const btnTodos = document.getElementById('btn-saida-todos');
+  if (btnTodos) btnTodos.disabled = total === 0;
+
+  if (dentro.length === 0) {
+    const isEmpty = getWithinNow().length === 0;
+    grid.innerHTML = `
+      <div class="monitor-empty">
+        <div class="monitor-empty-icon">${isEmpty ? '🏁' : '🔍'}</div>
+        <div class="monitor-empty-text">${isEmpty ? 'Nenhuma pessoa dentro agora' : 'Nenhum resultado para o filtro'}</div>
+        <div class="monitor-empty-sub">${isEmpty ? 'As entradas de hoje aparecerão aqui em tempo real.' : 'Tente outro filtro.'}</div>
+      </div>`;
+    return;
+  }
+
+  grid.innerHTML = dentro.map(r => `
+    <div class="monitor-card" id="mc-${r._id}">
+      <div class="monitor-card-header">
+        <div class="monitor-avatar">${personEmoji(r.cargo)}</div>
+        <div class="monitor-name-block">
+          <div class="monitor-person-name" title="${r.nome}">${r.nome}</div>
+          <div class="monitor-person-sub">${r.cargo || '—'} · ${r.empresa || '—'}</div>
+        </div>
+        <div class="monitor-time-badge">⏰ ${r.entrada}</div>
+      </div>
+      <div class="monitor-card-details">
+        <div class="monitor-detail">
+          <div class="monitor-detail-label">RG</div>
+          <div class="monitor-detail-value">${r.rg || '—'}</div>
+        </div>
+        <div class="monitor-detail">
+          <div class="monitor-detail-label">CPF</div>
+          <div class="monitor-detail-value">${r.cpf || '—'}</div>
+        </div>
+        <div class="monitor-detail">
+          <div class="monitor-detail-label">Data</div>
+          <div class="monitor-detail-value">${r.data || '—'}</div>
+        </div>
+        <div class="monitor-detail">
+          <div class="monitor-detail-label">Veículo</div>
+          <div class="monitor-detail-value">${r.placa || '—'}</div>
+        </div>
+      </div>
+      <div class="monitor-elapsed">Tempo dentro: <span>${elapsedTime(r.entrada)}</span></div>
+      <div class="monitor-card-actions" style="margin-top:.75rem;">
+        <button class="monitor-btn-saida" onclick="monitorSaida('${r._id}')">🚪 Registrar Saída</button>
+        <button class="monitor-btn-edit" onclick="editRow('dados','${r._id}')">✏️</button>
+      </div>
+    </div>`).join('');
+}
+
+// Auto-refresh elapsed times every 60s
+setInterval(() => {
+  const dentro = getWithinNow();
+  dentro.forEach(r => {
+    const el = document.querySelector(`#mc-${r._id} .monitor-elapsed span`);
+    if (el) el.textContent = elapsedTime(r.entrada);
+  });
+}, 60000);
+
+async function monitorSaida(id) {
+  const r = db.dados.find(x => x._id === id);
+  if (!r) return;
+  if (r.saida) { showToast('Saída já registrada.', 'error'); return; }
+  const saida = new Date().toTimeString().slice(0,5);
+  try {
+    await updateInFirestore('dados', id, { saida });
+    showToast(`🚪 Saída de ${r.nome.split(' ')[0]} registrada: ${saida}`);
+  } catch(e) { showToast('❌ Erro: ' + e.message, 'error'); }
+}
+
+async function confirmSaidaTodos() {
+  const dentro = getWithinNow();
+  if (!dentro.length) { showToast('Ninguém dentro agora.', 'error'); return; }
+  if (!confirm(`Registrar saída para TODAS as ${dentro.length} pessoas dentro agora?`)) return;
+  const saida = new Date().toTimeString().slice(0,5);
+  let ok = 0;
+  for (const r of dentro) {
+    try { await updateInFirestore('dados', r._id, { saida }); ok++; } catch(e) {}
+  }
+  showToast(`🚪 Saída registrada para ${ok} pessoas.`);
+}
+
+// ═══════════════════════════════════════════════════════════════
+// ADD CADASTRO
+// ═══════════════════════════════════════════════════════════════
+async function addCadastro() {
+  const nome = document.getElementById('c-nome').value.trim().toUpperCase();
+  const motivo = document.getElementById('c-motivo').value;
+  if (!nome)   { showToast('Preencha o Nome Completo', 'error'); return; }
+  if (!motivo) { showToast('Selecione o Motivo de Entrada', 'error'); return; }
+
+  const btn = document.getElementById('btn-save-cadastro');
+  btn.disabled = true; btn.textContent = '⏳ Salvando...';
+
+  try {
+    await addToFirestore('cadastro', {
+      nome, motivo,
+      rg:      document.getElementById('c-rg').value.trim(),
+      cpf:     document.getElementById('c-cpf').value.trim(),
+      cargo:   document.getElementById('c-cargo').value.trim().toUpperCase(),
+      empresa: document.getElementById('c-empresa').value.trim().toUpperCase(),
+    });
+    clearForm('c');
+    showToast('✅ Cadastro registrado com sucesso!');
+  } catch(e) {
+    showToast('❌ Erro ao salvar: ' + e.message, 'error');
+  } finally {
+    btn.disabled = false; btn.textContent = '💾 Salvar Cadastro';
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════
+// ADD DADO
+// ═══════════════════════════════════════════════════════════════
+async function addDado() {
+  const nome = document.getElementById('d-nome').value.trim().toUpperCase();
+  const data = document.getElementById('d-data').value;
+  if (!nome) { showToast('Preencha o Nome Completo', 'error'); return; }
+  if (!data) { showToast('Informe a Data', 'error'); return; }
+
+  const [y,m,d2] = data.split('-');
+  const btn = document.getElementById('btn-save-dados');
+  btn.disabled = true; btn.textContent = '⏳ Salvando...';
+
+  try {
+    await addToFirestore('dados', {
+      data:         `${d2}/${m}/${y}`,
+      placa:        document.getElementById('d-placa').value.trim().toUpperCase(),
+      placaTrailer: document.getElementById('d-placa-trailer').value.trim().toUpperCase(),
+      nome,
+      rg:      document.getElementById('d-rg').value.trim(),
+      cpf:     document.getElementById('d-cpf').value.trim(),
+      cargo:   document.getElementById('d-cargo').value.trim().toUpperCase(),
+      empresa: document.getElementById('d-empresa').value.trim().toUpperCase(),
+      entrada: document.getElementById('d-entrada').value,
+      saida:   document.getElementById('d-saida').value,
+    });
+    clearForm('d');
+    showToast('✅ Acesso registrado com sucesso!');
+  } catch(e) {
+    showToast('❌ Erro ao salvar: ' + e.message, 'error');
+  } finally {
+    btn.disabled = false; btn.textContent = '✅ Registrar Acesso';
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════
+// CLEAR FORM
+// ═══════════════════════════════════════════════════════════════
+function clearForm(prefix) {
+  if (prefix === 'c') {
+    ['c-nome','c-rg','c-cpf'].forEach(id => document.getElementById(id).value = '');
+    document.getElementById('c-cargo').value = '';
+    document.getElementById('c-empresa').value = '';
+    document.getElementById('c-motivo').value = '';
+  } else {
+    ['d-placa','d-placa-trailer','d-nome','d-rg','d-cpf','d-entrada','d-saida'].forEach(id => document.getElementById(id).value = '');
+    document.getElementById('d-cargo').value = '';
+    document.getElementById('d-empresa').value = '';
+    document.getElementById('d-data').value = new Date().toISOString().split('T')[0];
+  }
+  acClose();
+}
+
+// ═══════════════════════════════════════════════════════════════
+// FILTER
+// ═══════════════════════════════════════════════════════════════
+function filterTable(type) {
+  if (type === 'cadastro') {
+    const q = (document.getElementById('search-cadastro')||{value:''}).value.toLowerCase();
+    const motivo = document.getElementById('filt-motivo').value;
+    const empresa = (document.getElementById('filt-empresa-cad')||{value:''}).value;
+    filtered.cadastro = db.cadastro.filter(r => {
+      const match = [r.nome,r.rg,r.cpf,r.cargo,r.empresa,r.motivo].join(' ').toLowerCase().includes(q);
+      const mOk = !motivo || r.motivo === motivo;
+      const eOk = !empresa || (r.empresa||'').toUpperCase() === empresa.toUpperCase();
+      return match && mOk && eOk;
+    });
+  } else {
+    const q = document.getElementById('search-dados').value.toLowerCase();
+    const searchBy = document.getElementById('search-by-dados').value;
+    const di = document.getElementById('filt-data-inicio').value;
+    const df = document.getElementById('filt-data-fim').value;
+    const empresa = (document.getElementById('filt-empresa-dados')||{value:''}).value;
+    const cargo = (document.getElementById('filt-cargo-dados')||{value:''}).value;
+    filtered.dados = db.dados.filter(r => {
+      let match = true;
+      if (q) {
+        if (searchBy === 'nome')  match = (r.nome||'').toLowerCase().includes(q);
+        else if (searchBy === 'rg')   match = (r.rg||'').toLowerCase().includes(q);
+        else if (searchBy === 'cpf')  match = (r.cpf||'').toLowerCase().includes(q);
+        else if (searchBy === 'placa') match = [(r.placa||''),(r.placaTrailer||'')].join(' ').toLowerCase().includes(q);
+        else match = [r.nome,r.rg,r.cpf,r.placa,r.placaTrailer,r.empresa,r.cargo].join(' ').toLowerCase().includes(q);
+      }
+      let dateOk = true;
+      if ((di || df) && r.data) {
+        const [d2,m2,y2] = r.data.split('/');
+        const rDate = new Date(`${y2}-${m2}-${d2}`);
+        if (di && rDate < new Date(di)) dateOk = false;
+        if (df && rDate > new Date(df)) dateOk = false;
+      }
+      const eOk = !empresa || (r.empresa||'').toUpperCase() === empresa.toUpperCase();
+      const cOk = !cargo || (r.cargo||'').toUpperCase() === cargo.toUpperCase();
+      return match && dateOk && eOk && cOk;
+    });
+  }
+  pages[type] = 1;
+  renderTable(type);
+}
+
+// ═══════════════════════════════════════════════════════════════
+// SORT
+// ═══════════════════════════════════════════════════════════════
+function sortTable(type, col) {
+  const s = sortState[type];
+  if (s.col === col) s.asc = !s.asc; else { s.col = col; s.asc = true; }
+  const keys = type === 'cadastro'
+    ? ['nome','rg','cpf','cargo','empresa','motivo']
+    : ['data','placa','placaTrailer','nome','rg','cpf','cargo','empresa','entrada','saida'];
+  const k = keys[col];
+  filtered[type].sort((a,b) => {
+    const va = (a[k]||'').toString().toLowerCase();
+    const vb = (b[k]||'').toString().toLowerCase();
+    return s.asc ? va.localeCompare(vb) : vb.localeCompare(va);
+  });
+  renderTable(type);
+}
+
+// ═══════════════════════════════════════════════════════════════
+// RENDER TABLE
+// ═══════════════════════════════════════════════════════════════
+function renderTable(type) {
+  const data = filtered[type];
+  const pg = pages[type];
+  const start = (pg-1)*PAGE_SIZE;
+  const slice = data.slice(start, start + PAGE_SIZE);
+  const tbody = document.getElementById('tbody-' + type);
+
+  document.getElementById('cnt-' + type).textContent = data.length;
+
+  if (data.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="20"><div class="empty-state"><div class="empty-icon">🗂️</div><div class="empty-text">Nenhum registro encontrado.</div></div></td></tr>`;
+    document.getElementById('pg-' + type).innerHTML = '';
+    return;
+  }
+
+  if (type === 'cadastro') {
+    tbody.innerHTML = slice.map(r => `
+      <tr>
+        <td class="td-name">${r.nome}</td>
+        <td class="td-mono">${r.rg || '—'}</td>
+        <td class="td-mono">${r.cpf || '—'}</td>
+        <td>${r.cargo || '—'}</td>
+        <td>${r.empresa || '—'}</td>
+        <td>${motivoBadge(r.motivo)}</td>
+        <td>
+          <button class="action-btn" title="Editar" onclick="editRow('cadastro','${r._id}')">✏️</button>
+          <button class="action-btn del" title="Excluir" onclick="deleteRow('cadastro','${r._id}')">🗑</button>
+        </td>
+      </tr>`).join('');
+  } else {
+    tbody.innerHTML = slice.map(r => `
+      <tr>
+        <td class="td-mono">${r.data}</td>
+        <td>${r.placa ? `<span class="td-plate">${r.placa}</span>` : `<span class="td-plate-empty">—</span>`}</td>
+        <td>${r.placaTrailer ? `<span class="td-plate" style="border-color:rgba(245,166,35,.4);background:rgba(245,166,35,.07);" title="Trailer">${r.placaTrailer} <small>🚛</small></span>` : `<span class="td-plate-empty">—</span>`}</td>
+        <td class="td-name">${r.nome}</td>
+        <td class="td-mono">${r.rg || '—'}</td>
+        <td class="td-mono">${r.cpf || '—'}</td>
+        <td>${r.cargo || '—'}</td>
+        <td>${r.empresa || '—'}</td>
+        <td class="td-mono">${r.entrada || '—'}</td>
+        <td class="td-mono">${r.saida || '—'}</td>
+        <td>${statusBadge(r)}</td>
+        <td>
+          <button class="action-btn success-btn" title="Registrar saída" onclick="registerSaida('${r._id}')">🚪</button>
+          <button class="action-btn" title="Editar" onclick="editRow('dados','${r._id}')">✏️</button>
+          <button class="action-btn del" title="Excluir" onclick="deleteRow('dados','${r._id}')">🗑</button>
+        </td>
+      </tr>`).join('');
+  }
+
+  renderPagination(type, data.length);
+}
+
+function motivoBadge(m) {
+  const colors = { 'VISITANTE':'badge-in','ENTREGA':'badge-open','DESCARGA':'badge-open','COLETA':'badge-open','ENTREVISTA':'badge-in','PRESTADOR':'badge-out','MANUTENÇÃO':'badge-out','FUNCIONÁRIO':'badge-in' };
+  return `<span class="badge ${colors[m]||'badge-out'}">${m||'—'}</span>`;
+}
+function statusBadge(r) {
+  if (r.entrada && r.saida) return `<span class="badge badge-out">✓ Saiu</span>`;
+  if (r.entrada && !r.saida) return `<span class="badge badge-open">● Dentro</span>`;
+  return `<span class="badge badge-out">— —</span>`;
+}
+
+// ═══════════════════════════════════════════════════════════════
+// PAGINATION
+// ═══════════════════════════════════════════════════════════════
+function renderPagination(type, total) {
+  const totalPages = Math.ceil(total / PAGE_SIZE);
+  const pg = pages[type];
+  const wrap = document.getElementById('pg-' + type);
+  if (totalPages <= 1) { wrap.innerHTML = ''; return; }
+  let btns = '';
+  for (let i = 1; i <= totalPages; i++) {
+    btns += `<button class="page-btn ${i===pg?'active':''}" onclick="goPage('${type}',${i})">${i}</button>`;
+  }
+  wrap.innerHTML = `
+    <div class="page-info">Exibindo ${((pg-1)*PAGE_SIZE)+1}–${Math.min(pg*PAGE_SIZE,total)} de ${total} registros</div>
+    <div class="page-btns">
+      <button class="page-btn" onclick="goPage('${type}',${pg-1})" ${pg===1?'disabled':''}>‹</button>
+      ${btns}
+      <button class="page-btn" onclick="goPage('${type}',${pg+1})" ${pg===totalPages?'disabled':''}>›</button>
+    </div>`;
+}
+function goPage(type, pg) {
+  const max = Math.ceil(filtered[type].length / PAGE_SIZE);
+  if (pg < 1 || pg > max) return;
+  pages[type] = pg;
+  renderTable(type);
+}
+
+// ═══════════════════════════════════════════════════════════════
+// STATS
+// ═══════════════════════════════════════════════════════════════
+function renderStats(type) {
+  if (type === 'cadastro') {
+    const d = db.cadastro;
+    const empresas = new Set(d.map(r=>r.empresa).filter(Boolean));
+    document.getElementById('stats-cadastro').innerHTML = `
+      <div class="stat-card"><div class="stat-value">${d.length}</div><div class="stat-label">Total Cadastrados</div></div>
+      <div class="stat-card"><div class="stat-value">${d.filter(r=>r.motivo==='VISITANTE').length}</div><div class="stat-label">Visitantes</div></div>
+      <div class="stat-card"><div class="stat-value">${d.filter(r=>r.motivo==='PRESTADOR').length}</div><div class="stat-label">Prestadores</div></div>
+      <div class="stat-card"><div class="stat-value">${d.filter(r=>/ENTREGA|DESCARGA|COLETA/.test(r.motivo)).length}</div><div class="stat-label">Entregas/Descargas</div></div>
+      <div class="stat-card"><div class="stat-value">${empresas.size}</div><div class="stat-label">Empresas</div></div>`;
+  } else {
+    const d = db.dados;
+    const dentro = d.filter(r=>r.entrada && !r.saida).length;
+    const hoje = todayStr();
+    const hdj = d.filter(r => r.data === hoje).length;
+    const dentroHoje = d.filter(r => r.data === hoje && r.entrada && !r.saida).length;
+    document.getElementById('stats-dados').innerHTML = `
+      <div class="stat-card"><div class="stat-value">${d.length}</div><div class="stat-label">Total de Acessos</div></div>
+      <div class="stat-card"><div class="stat-value" style="color:var(--success)">${dentroHoje}</div><div class="stat-label">Dentro Agora</div></div>
+      <div class="stat-card"><div class="stat-value">${hdj}</div><div class="stat-label">Acessos Hoje</div></div>
+      <div class="stat-card"><div class="stat-value">${d.filter(r=>r.placa).length}</div><div class="stat-label">Com Veículo</div></div>
+      <div class="stat-card"><div class="stat-value">${new Set(d.map(r=>r.data)).size}</div><div class="stat-label">Dias com Registro</div></div>`;
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════
+// DELETE
+// ═══════════════════════════════════════════════════════════════
+async function deleteRow(type, id) {
+  if (!confirm('Excluir este registro?')) return;
+  try {
+    await deleteFromFirestore(type, id);
+    showToast('Registro excluído.');
+  } catch(e) {
+    showToast('❌ Erro ao excluir: ' + e.message, 'error');
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════
+// REGISTER SAÍDA
+// ═══════════════════════════════════════════════════════════════
+async function registerSaida(id) {
+  const r = db.dados.find(x => x._id === id);
+  if (!r) return;
+  if (r.saida) { showToast('Saída já registrada.', 'error'); return; }
+  const saida = new Date().toTimeString().slice(0,5);
+  try {
+    await updateInFirestore('dados', id, { saida });
+    showToast(`🚪 Saída de ${r.nome.split(' ')[0]} registrada: ${saida}`);
+  } catch(e) {
+    showToast('❌ Erro: ' + e.message, 'error');
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════
+// EDIT MODAL
+// ═══════════════════════════════════════════════════════════════
+function editRow(type, id) {
+  const r = (type === 'cadastro' ? db.cadastro : db.dados).find(x => x._id === id);
+  if (!r) return;
+  editContext = { type, id };
+
+  const cargoOpts = getCargoOptions();
+  const empresaOpts = db.empresa.map(x => x.nome).sort();
+  const cargoSel = (opts, cur) => `<option value="">Selecione...</option>` + opts.map(o => `<option ${o===cur?'selected':''}>${o}</option>`).join('');
+
+  document.getElementById('modal-title').textContent = type === 'cadastro' ? 'Editar Cadastro' : 'Editar Registro de Acesso';
+
+  if (type === 'cadastro') {
+    document.getElementById('modal-body').innerHTML = `
+      <div class="form-grid">
+        <div class="form-group half"><label>Nome</label><input id="m-nome" value="${r.nome||''}"></div>
+        <div class="form-group"><label>RG</label><input id="m-rg" value="${r.rg||''}"></div>
+        <div class="form-group"><label>CPF</label><input id="m-cpf" value="${r.cpf||''}"></div>
+        <div class="form-group half"><label>Cargo</label>
+          <select id="m-cargo-sel">${cargoSel(cargoOpts, r.cargo||'')}</select>
+        </div>
+        <div class="form-group"><label>Empresa</label>
+          <select id="m-empresa-sel">${cargoSel(empresaOpts, r.empresa||'')}</select>
+        </div>
+        <div class="form-group"><label>Motivo</label>
+          <select id="m-motivo">
+            ${['PRESTADOR','ENTREGA','COLETA','VISITANTE','DESCARGA','ENTREVISTA','MANUTENÇÃO','FUNCIONÁRIO','OUTRO']
+              .map(m=>`<option ${r.motivo===m?'selected':''}>${m}</option>`).join('')}
+          </select>
+        </div>
+      </div>`;
+  } else {
+    const parts = (r.data||'').split('/');
+    const dateVal = parts.length === 3 ? `${parts[2]}-${parts[1]}-${parts[0]}` : '';
+    document.getElementById('modal-body').innerHTML = `
+      <div class="form-grid">
+        <div class="form-group"><label>Data</label><input type="date" id="m-data" value="${dateVal}"></div>
+        <div class="form-group"><label>Placa Veículo</label><input id="m-placa" value="${r.placa||''}"></div>
+        <div class="form-group"><label>Placa Trailer</label><input id="m-placa-trailer" value="${r.placaTrailer||''}" placeholder="Quando aplicável"></div>
+        <div class="form-group half"><label>Nome</label><input id="m-nome" value="${r.nome||''}"></div>
+        <div class="form-group"><label>RG</label><input id="m-rg" value="${r.rg||''}"></div>
+        <div class="form-group"><label>CPF</label><input id="m-cpf" value="${r.cpf||''}"></div>
+        <div class="form-group"><label>Cargo</label>
+          <select id="m-cargo-sel">${cargoSel(cargoOpts, r.cargo||'')}</select>
+        </div>
+        <div class="form-group"><label>Empresa</label>
+          <select id="m-empresa-sel">${cargoSel(empresaOpts, r.empresa||'')}</select>
+        </div>
+        <div class="form-group"><label>Entrada</label><input type="time" id="m-entrada" value="${r.entrada||''}"></div>
+        <div class="form-group"><label>Saída</label><input type="time" id="m-saida" value="${r.saida||''}"></div>
+      </div>`;
+  }
+  document.getElementById('modal-overlay').classList.add('open');
+}
+
+document.getElementById('modal-save-btn').onclick = async function() {
+  if (!editContext) return;
+  const { type, id } = editContext;
+  const btn = this;
+  btn.disabled = true; btn.textContent = '⏳ Salvando...';
+
+  const updates = {
+    nome:    document.getElementById('m-nome').value.trim().toUpperCase(),
+    rg:      document.getElementById('m-rg').value.trim(),
+    cpf:     document.getElementById('m-cpf').value.trim(),
+    cargo:   (document.getElementById('m-cargo-sel')||{value:''}).value.trim().toUpperCase(),
+    empresa: (document.getElementById('m-empresa-sel')||{value:''}).value.trim().toUpperCase(),
+  };
+
+  if (type === 'cadastro') {
+    updates.motivo = document.getElementById('m-motivo').value;
+  } else {
+    updates.placa        = document.getElementById('m-placa').value.trim().toUpperCase();
+    updates.placaTrailer = document.getElementById('m-placa-trailer').value.trim().toUpperCase();
+    updates.entrada = document.getElementById('m-entrada').value;
+    updates.saida   = document.getElementById('m-saida').value;
+    const dv = document.getElementById('m-data').value;
+    if (dv) { const [y,m,d] = dv.split('-'); updates.data = `${d}/${m}/${y}`; }
+  }
+
+  try {
+    await updateInFirestore(type, id, updates);
+    closeModal();
+    showToast('✅ Registro atualizado!');
+  } catch(e) {
+    showToast('❌ Erro ao atualizar: ' + e.message, 'error');
+  } finally {
+    btn.disabled = false; btn.textContent = '💾 Salvar';
+  }
+};
+
+function closeModal() {
+  document.getElementById('modal-overlay').classList.remove('open');
+  editContext = null;
+}
+document.getElementById('modal-overlay').addEventListener('click', function(e) {
+  if (e.target === this) closeModal();
+});
+
+// ═══════════════════════════════════════════════════════════════
+// EXPORT CSV
+// ═══════════════════════════════════════════════════════════════
+function exportCSV(type) {
+  const data = filtered[type];
+  const headers = type === 'cadastro'
+    ? ['NOME','RG','CPF','CARGO','EMPRESA','MOTIVO']
+    : ['DATA','PLACA','PLACA_TRAILER','NOME','RG','CPF','CARGO','EMPRESA','ENTRADA','SAIDA'];
+  const keys = type === 'cadastro'
+    ? ['nome','rg','cpf','cargo','empresa','motivo']
+    : ['data','placa','placaTrailer','nome','rg','cpf','cargo','empresa','entrada','saida'];
+  const csv = [headers.join(';'), ...data.map(r => keys.map(k => `"${(r[k]||'').replace(/"/g,'""')}"`).join(';'))].join('\n');
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob(['\uFEFF'+csv], { type:'text/csv;charset=utf-8' }));
+  a.download = `controle_acesso_${type}_${new Date().toISOString().slice(0,10)}.csv`;
+  a.click();
+  showToast('📥 CSV exportado com sucesso!');
+}
+
+// ═══════════════════════════════════════════════════════════════
+// AUTOCOMPLETE — busca no banco de cadastros (formulário acesso)
+// ═══════════════════════════════════════════════════════════════
+let acHighlight = -1;
+
+function acSearch(val) {
+  const list = document.getElementById('ac-list');
+  const q = val.trim().toLowerCase();
+  if (!q || q.length < 2) { acClose(); return; }
+
+  const results = db.cadastro.filter(r =>
+    (r.nome||'').toLowerCase().includes(q) ||
+    (r.rg||'').toLowerCase().includes(q) ||
+    (r.cpf||'').toLowerCase().includes(q)
+  ).slice(0, 8);
+
+  if (!results.length) { acClose(); return; }
+
+  acHighlight = -1;
+  list.innerHTML = results.map((r, i) => `
+    <div class="autocomplete-item" data-idx="${i}" onmousedown="acSelect(${i})">
+      <span class="ac-name">${r.nome}<span class="ac-badge">${r.motivo||''}</span></span>
+      <span class="ac-meta">${[r.rg ? 'RG: '+r.rg : '', r.cpf ? 'CPF: '+r.cpf : '', r.empresa||''].filter(Boolean).join(' · ')}</span>
+    </div>`).join('');
+  list._results = results;
+  list.classList.add('open');
+}
+
+function acSelect(idx) {
+  const list = document.getElementById('ac-list');
+  const r = (list._results || [])[idx];
+  if (!r) return;
+  document.getElementById('d-nome').value    = r.nome || '';
+  document.getElementById('d-rg').value      = r.rg   || '';
+  document.getElementById('d-cpf').value     = r.cpf  || '';
+  // Set selects
+  const cargoEl = document.getElementById('d-cargo');
+  const empEl = document.getElementById('d-empresa');
+  if (cargoEl) cargoEl.value = r.cargo || '';
+  if (empEl) empEl.value = r.empresa || '';
+  acClose();
+  showToast(`✅ Cadastro de ${r.nome.split(' ')[0]} carregado!`);
+}
+
+function acClose() {
+  const list = document.getElementById('ac-list');
+  if (list) { list.classList.remove('open'); list.innerHTML = ''; }
+  acHighlight = -1;
+}
+
+function acKeyNav(e) {
+  const list = document.getElementById('ac-list');
+  if (!list.classList.contains('open')) return;
+  const items = list.querySelectorAll('.autocomplete-item');
+  if (e.key === 'ArrowDown') { e.preventDefault(); acHighlight = Math.min(acHighlight + 1, items.length - 1); }
+  else if (e.key === 'ArrowUp') { e.preventDefault(); acHighlight = Math.max(acHighlight - 1, -1); }
+  else if (e.key === 'Enter' && acHighlight >= 0) { e.preventDefault(); acSelect(acHighlight); return; }
+  else if (e.key === 'Escape') { acClose(); return; }
+  items.forEach((el, i) => el.classList.toggle('highlighted', i === acHighlight));
+}
+
+document.addEventListener('mousedown', function(e) {
+  const wrap = document.querySelector('.autocomplete-wrap');
+  if (wrap && !wrap.contains(e.target)) acClose();
+});
+
+// ═══════════════════════════════════════════════════════════════
+// QUICK SEARCH — busca rápida na aba de acessos
+// ═══════════════════════════════════════════════════════════════
+let qsType = 'nome';
+
+function setQsType(type, btn) {
+  qsType = type;
+  document.querySelectorAll('.qs-type-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  const input = document.getElementById('qs-input');
+  const placeholders = { nome: 'Digite o nome...', rg: 'Digite o RG...', cpf: 'Digite o CPF...' };
+  input.placeholder = placeholders[type];
+  input.focus();
+  qsSearch();
+}
+
+function qsSearch() {
+  const q = document.getElementById('qs-input').value.trim().toLowerCase();
+  const wrap = document.getElementById('qs-results');
+  if (!q || q.length < 2) { wrap.classList.remove('open'); wrap.innerHTML = ''; return; }
+
+  const results = db.cadastro.filter(r => {
+    if (qsType === 'nome') return (r.nome||'').toLowerCase().includes(q);
+    if (qsType === 'rg')   return (r.rg||'').toLowerCase().includes(q);
+    if (qsType === 'cpf')  return (r.cpf||'').toLowerCase().replace(/\D/g,'').includes(q.replace(/\D/g,''));
+    return false;
+  }).slice(0, 12);
+
+  if (!results.length) {
+    wrap.innerHTML = `<div class="qs-no-results">Nenhum cadastro encontrado para "${q}"</div>`;
+    wrap.classList.add('open');
+    return;
+  }
+
+  const hoje = todayStr();
+
+  wrap.innerHTML = results.map((r, i) => {
+    const accessToday = db.dados.filter(d =>
+      (d.nome||'').toUpperCase() === (r.nome||'').toUpperCase() && d.data === hoje
+    ).sort((a,b) => (b._createdAt?.seconds||0) - (a._createdAt?.seconds||0));
+    const lastAccess = accessToday[0];
+    const isDentro = lastAccess && lastAccess.entrada && !lastAccess.saida;
+    const hasSaidaHoje = lastAccess && lastAccess.entrada && lastAccess.saida;
+
+    return `
+    <div class="qs-result-item">
+      <div class="qs-status-dot ${isDentro ? 'qs-status-in' : 'qs-status-out'}" title="${isDentro ? 'Dentro agora' : 'Fora'}"></div>
+      <div class="qs-result-info">
+        <div class="qs-result-name">
+          ${r.nome}
+          <span class="qs-result-motivo">${r.motivo||''}</span>
+        </div>
+        <div class="qs-result-meta">
+          ${[r.rg ? 'RG: '+r.rg : '', r.cpf ? 'CPF: '+r.cpf : '', r.empresa||'', r.cargo||''].filter(Boolean).join(' · ')}
+          ${isDentro ? ` <span style="color:var(--success)">● Entrou ${lastAccess.entrada}</span>` : ''}
+          ${hasSaidaHoje && !isDentro ? ` <span style="color:var(--muted)">Saiu ${lastAccess.saida}</span>` : ''}
+        </div>
+      </div>
+      <div class="qs-action-btns">
+        <button class="qs-btn-entrada" onclick="qsRegistrarEntrada('${r._id}')" ${isDentro ? 'disabled' : ''} title="Registrar Entrada">
+          🟢 Entrada
+        </button>
+        <button class="qs-btn-saida" onclick="qsRegistrarSaida('${lastAccess ? lastAccess._id : ''}')" ${!isDentro ? 'disabled' : ''} title="Registrar Saída">
+          🚪 Saída
+        </button>
+      </div>
+    </div>`;
+  }).join('');
+
+  wrap._results = results;
+  wrap.classList.add('open');
+}
+
+async function qsRegistrarEntrada(cadastroId) {
+  const r = db.cadastro.find(x => x._id === cadastroId);
+  if (!r) return;
+  const now = new Date();
+  const hoje = todayStr();
+  const entrada = now.toTimeString().slice(0,5);
+  try {
+    await addToFirestore('dados', {
+      data: hoje, nome: r.nome, rg: r.rg||'', cpf: r.cpf||'',
+      cargo: r.cargo||'', empresa: r.empresa||'',
+      placa: '', placaTrailer: '', entrada, saida: '',
+    });
+    showToast(`🟢 Entrada de ${r.nome.split(' ')[0]} registrada: ${entrada}`);
+    setTimeout(qsSearch, 600);
+  } catch(e) { showToast('❌ Erro: ' + e.message, 'error'); }
+}
+
+async function qsRegistrarSaida(dadoId) {
+  if (!dadoId) { showToast('Nenhum acesso aberto encontrado.', 'error'); return; }
+  const r = db.dados.find(x => x._id === dadoId);
+  if (!r) return;
+  if (r.saida) { showToast('Saída já registrada.', 'error'); return; }
+  const saida = new Date().toTimeString().slice(0,5);
+  try {
+    await updateInFirestore('dados', dadoId, { saida });
+    showToast(`🚪 Saída de ${r.nome.split(' ')[0]} registrada: ${saida}`);
+    setTimeout(qsSearch, 600);
+  } catch(e) { showToast('❌ Erro: ' + e.message, 'error'); }
+}
+
+// ═══════════════════════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════════════════════
+initFirebase();
+</script>
+</body>
+</html>
