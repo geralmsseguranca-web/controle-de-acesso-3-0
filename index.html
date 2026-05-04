@@ -720,6 +720,139 @@
     .form-group.half { grid-column: span 1; }
     .monitor-card-details { grid-template-columns: 1fr; }
   }
+
+  /* ══════════════════════════════
+     ABA RELATÓRIOS — Export Cards
+  ══════════════════════════════ */
+  .rel-export-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1rem;
+    margin-bottom: 1rem;
+  }
+  .rel-export-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1.25rem 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    transition: transform .18s, box-shadow .18s;
+    position: relative;
+    overflow: hidden;
+  }
+  .rel-export-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0; height: 3px;
+  }
+  .rel-card-pdf::before { background: linear-gradient(90deg, #e05555, #ff7c7c); }
+  .rel-card-csv::before { background: linear-gradient(90deg, #3dba7c, #2de096); }
+  .rel-card-excel::before { background: linear-gradient(90deg, #217346, #34a15a); }
+  .rel-export-card:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,0,0,.35); }
+  .rel-card-icon { font-size: 2rem; flex-shrink: 0; }
+  .rel-card-info { flex: 1; min-width: 0; }
+  .rel-card-title { font-weight: 700; font-size: .9rem; color: var(--text); margin-bottom: .2rem; }
+  .rel-card-desc { font-size: .75rem; color: var(--muted); }
+
+  /* ── Export Buttons ── */
+  .rel-btn {
+    font-family: 'DM Sans', sans-serif;
+    font-size: .82rem; font-weight: 700;
+    letter-spacing: .04em;
+    padding: .6rem 1.1rem;
+    border: none; border-radius: 8px;
+    cursor: pointer; display: flex;
+    align-items: center; gap: .4rem;
+    transition: all .18s; white-space: nowrap;
+    flex-shrink: 0;
+  }
+  .rel-btn:hover { transform: translateY(-1px); filter: brightness(1.1); box-shadow: 0 4px 14px rgba(0,0,0,.3); }
+  .rel-btn:active { transform: translateY(0); }
+
+  .rel-btn-pdf {
+    background: linear-gradient(135deg, #e05555 0%, #c0392b 100%);
+    color: #fff;
+    box-shadow: 0 2px 8px rgba(224,85,85,.35);
+  }
+  .rel-btn-csv {
+    background: linear-gradient(135deg, #3dba7c 0%, #27ae60 100%);
+    color: #fff;
+    box-shadow: 0 2px 8px rgba(61,186,124,.35);
+  }
+  .rel-btn-excel {
+    background: linear-gradient(135deg, #217346 0%, #1a5c38 100%);
+    color: #fff;
+    box-shadow: 0 2px 8px rgba(33,115,70,.4);
+  }
+  .rel-btn-icon { font-size: 1rem; }
+
+  /* ══════════════════════════════
+     BALLOON POPUP — Entrada pós-cadastro
+  ══════════════════════════════ */
+  .entrada-balloon {
+    position: fixed;
+    bottom: 5.5rem;
+    right: 2rem;
+    z-index: 500;
+    filter: drop-shadow(0 8px 24px rgba(0,0,0,.55));
+    animation: balloonPop .35s cubic-bezier(.34,1.56,.64,1) forwards;
+    max-width: 360px;
+    width: calc(100vw - 4rem);
+  }
+  @keyframes balloonPop {
+    from { opacity: 0; transform: scale(.7) translateY(20px); }
+    to   { opacity: 1; transform: scale(1) translateY(0); }
+  }
+  .balloon-arrow {
+    width: 0; height: 0;
+    border-left: 12px solid transparent;
+    border-right: 12px solid transparent;
+    border-top: 12px solid #1e253a;
+    margin-left: auto;
+    margin-right: 2rem;
+  }
+  .balloon-body {
+    background: #1e253a;
+    border: 1px solid rgba(245,166,35,.4);
+    border-radius: 14px 14px 14px 14px;
+    padding: 1.25rem 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: .85rem;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.06);
+  }
+  .balloon-icon { font-size: 1.8rem; text-align: center; }
+  .balloon-text { text-align: center; }
+  .balloon-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.2rem; letter-spacing: .06em;
+    color: var(--accent); margin-bottom: .25rem;
+  }
+  .balloon-sub { font-size: .85rem; color: var(--muted); }
+  .balloon-actions { display: flex; gap: .6rem; flex-direction: column; }
+  .balloon-btn-yes {
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 700; font-size: .88rem;
+    padding: .7rem 1rem; border: none; border-radius: 9px;
+    background: linear-gradient(135deg, #3dba7c, #27ae60);
+    color: #fff; cursor: pointer;
+    transition: all .18s;
+    box-shadow: 0 3px 10px rgba(61,186,124,.4);
+    display: flex; align-items: center; justify-content: center; gap: .4rem;
+  }
+  .balloon-btn-yes:hover { filter: brightness(1.1); transform: translateY(-1px); }
+  .balloon-btn-no {
+    font-family: 'DM Sans', sans-serif;
+    font-size: .8rem; font-weight: 600;
+    padding: .5rem; border: 1px solid var(--border);
+    border-radius: 8px; background: transparent;
+    color: var(--muted); cursor: pointer;
+    transition: all .15s;
+    display: flex; align-items: center; justify-content: center; gap: .4rem;
+  }
+  .balloon-btn-no:hover { border-color: var(--danger); color: var(--danger); }
 </style>
 </head>
 <body>
@@ -778,6 +911,9 @@
     </button>
     <button class="tab-btn" onclick="switchTab('config', this)">
       ⚙️ Configurações
+    </button>
+    <button class="tab-btn" onclick="switchTab('relatorios', this)">
+      📈 Relatórios
     </button>
   </div>
 
@@ -1113,6 +1249,136 @@
       </div>
     </div>
   </div>
+  <!-- ══ ABA 5: RELATÓRIOS ══ -->
+  <div id="panel-relatorios" class="tab-panel">
+    <div class="section-header">
+      <div>
+        <div class="section-title">📈 <span>Relatórios</span></div>
+        <div class="section-sub">Exporte, filtre e analise os dados do sistema</div>
+      </div>
+    </div>
+
+    <!-- CARDS DE EXPORT -->
+    <div class="rel-export-grid">
+
+      <!-- PDF CADASTRO -->
+      <div class="rel-export-card rel-card-pdf">
+        <div class="rel-card-icon">📄</div>
+        <div class="rel-card-info">
+          <div class="rel-card-title">Cadastros em PDF</div>
+          <div class="rel-card-desc">Relatório completo de cadastros de visitantes</div>
+        </div>
+        <button class="rel-btn rel-btn-pdf" onclick="exportRelatorioPDF('cadastro')">
+          <span class="rel-btn-icon">⬇</span> Exportar PDF
+        </button>
+      </div>
+
+      <!-- PDF ACESSOS -->
+      <div class="rel-export-card rel-card-pdf">
+        <div class="rel-card-icon">📋</div>
+        <div class="rel-card-info">
+          <div class="rel-card-title">Acessos em PDF</div>
+          <div class="rel-card-desc">Histórico de entradas e saídas em PDF</div>
+        </div>
+        <button class="rel-btn rel-btn-pdf" onclick="exportRelatorioPDF('dados')">
+          <span class="rel-btn-icon">⬇</span> Exportar PDF
+        </button>
+      </div>
+
+      <!-- CSV CADASTRO -->
+      <div class="rel-export-card rel-card-csv">
+        <div class="rel-card-icon">📊</div>
+        <div class="rel-card-info">
+          <div class="rel-card-title">Cadastros em CSV</div>
+          <div class="rel-card-desc">Dados de cadastros para planilhas</div>
+        </div>
+        <button class="rel-btn rel-btn-csv" onclick="exportCSV('cadastro')">
+          <span class="rel-btn-icon">⬇</span> Exportar CSV
+        </button>
+      </div>
+
+      <!-- CSV ACESSOS -->
+      <div class="rel-export-card rel-card-csv">
+        <div class="rel-card-icon">📑</div>
+        <div class="rel-card-info">
+          <div class="rel-card-title">Acessos em CSV</div>
+          <div class="rel-card-desc">Histórico de acessos para planilhas</div>
+        </div>
+        <button class="rel-btn rel-btn-csv" onclick="exportCSV('dados')">
+          <span class="rel-btn-icon">⬇</span> Exportar CSV
+        </button>
+      </div>
+
+      <!-- EXCEL CADASTRO -->
+      <div class="rel-export-card rel-card-excel">
+        <div class="rel-card-icon">📗</div>
+        <div class="rel-card-info">
+          <div class="rel-card-title">Cadastros em Excel</div>
+          <div class="rel-card-desc">Planilha Excel (.xlsx) com cadastros</div>
+        </div>
+        <button class="rel-btn rel-btn-excel" onclick="exportExcel('cadastro')">
+          <span class="rel-btn-icon">⬇</span> Exportar Excel
+        </button>
+      </div>
+
+      <!-- EXCEL ACESSOS -->
+      <div class="rel-export-card rel-card-excel">
+        <div class="rel-card-icon">📘</div>
+        <div class="rel-card-info">
+          <div class="rel-card-title">Acessos em Excel</div>
+          <div class="rel-card-desc">Planilha Excel (.xlsx) com todos os acessos</div>
+        </div>
+        <button class="rel-btn rel-btn-excel" onclick="exportExcel('dados')">
+          <span class="rel-btn-icon">⬇</span> Exportar Excel
+        </button>
+      </div>
+    </div>
+
+    <!-- FILTROS DO RELATÓRIO -->
+    <div class="form-card" style="margin-top:2rem;">
+      <div class="form-card-title">🔎 Filtros do Relatório de Acessos</div>
+      <div class="form-grid">
+        <div class="form-group">
+          <label>Data Inicial</label>
+          <input type="date" id="rel-data-inicio">
+        </div>
+        <div class="form-group">
+          <label>Data Final</label>
+          <input type="date" id="rel-data-fim">
+        </div>
+        <div class="form-group">
+          <label>Empresa</label>
+          <select id="rel-empresa">
+            <option value="">Todas as empresas</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Cargo</label>
+          <select id="rel-cargo">
+            <option value="">Todos os cargos</option>
+          </select>
+        </div>
+      </div>
+      <div class="btn-row" style="flex-wrap:wrap;gap:.75rem;margin-top:1.25rem;">
+        <button class="rel-btn rel-btn-pdf" style="flex:0 0 auto;" onclick="exportRelatorioFiltradoPDF()">
+          <span class="rel-btn-icon">📄</span> PDF Filtrado
+        </button>
+        <button class="rel-btn rel-btn-csv" style="flex:0 0 auto;" onclick="exportRelatorioFiltradoCSV()">
+          <span class="rel-btn-icon">📊</span> CSV Filtrado
+        </button>
+        <button class="rel-btn rel-btn-excel" style="flex:0 0 auto;" onclick="exportRelatorioFiltradoExcel()">
+          <span class="rel-btn-icon">📗</span> Excel Filtrado
+        </button>
+      </div>
+    </div>
+
+    <!-- RESUMO ESTATÍSTICO -->
+    <div class="form-card" style="margin-top:1.5rem;">
+      <div class="form-card-title">📊 Resumo Estatístico</div>
+      <div class="stats-row" id="stats-relatorios"></div>
+      <canvas id="rel-chart-bar" style="max-height:260px;margin-top:1rem;"></canvas>
+    </div>
+  </div>
 </main>
 
 <!-- ══ MODAL (edit) ══ -->
@@ -1130,6 +1396,25 @@
 
 <!-- ══ TOAST ══ -->
 <div id="toast"></div>
+
+<!-- ══ POPUP BALLOON — Registrar Entrada após Cadastro ══ -->
+<div id="entrada-balloon" class="entrada-balloon" style="display:none;">
+  <div class="balloon-arrow"></div>
+  <div class="balloon-body">
+    <div class="balloon-icon">🎉</div>
+    <div class="balloon-text">
+      <div class="balloon-title">Cadastro realizado!</div>
+      <div class="balloon-sub" id="balloon-nome-text">Deseja registrar a entrada agora?</div>
+    </div>
+    <div class="balloon-actions">
+      <button class="balloon-btn-yes" id="balloon-btn-sim" onclick="balloonRegistrarEntrada()">✅ Sim, registrar entrada</button>
+      <button class="balloon-btn-no" onclick="closeBalloon()">✕ Não agora</button>
+    </div>
+  </div>
+</div>
+
+<!-- SheetJS para exportação Excel -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 
 <script>
 // ═══════════════════════════════════════════════════════════════
@@ -1280,6 +1565,7 @@ function switchTab(name, btn) {
   document.getElementById('panel-' + name).classList.add('active');
   if (name === 'monitor') renderMonitor();
   if (name === 'config') renderAllConfigLists();
+  if (name === 'relatorios') renderRelatoriosStats();
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -1374,6 +1660,8 @@ function refreshAllDropdowns() {
   updateSelect('filt-cargo-dados', cargoOpts, 'Todos os cargos');
   updateSelect('monitor-filt-empresa', empresaOpts, 'Todas as empresas');
   updateSelect('monitor-filt-cargo', cargoOpts, 'Todos os cargos');
+  updateSelect('rel-empresa', empresaOpts, 'Todas as empresas');
+  updateSelect('rel-cargo', cargoOpts, 'Todos os cargos');
 
   // Also update modal dropdowns if open
   const mCargo = document.getElementById('m-cargo-sel');
@@ -1633,6 +1921,8 @@ async function confirmSaidaTodos() {
 // ═══════════════════════════════════════════════════════════════
 // ADD CADASTRO
 // ═══════════════════════════════════════════════════════════════
+let lastCadastroSaved = null;
+
 async function addCadastro() {
   const nome = document.getElementById('c-nome').value.trim().toUpperCase();
   const motivo = document.getElementById('c-motivo').value;
@@ -1643,15 +1933,23 @@ async function addCadastro() {
   btn.disabled = true; btn.textContent = '⏳ Salvando...';
 
   try {
-    await addToFirestore('cadastro', {
+    const newId = await addToFirestore('cadastro', {
       nome, motivo,
       rg:      document.getElementById('c-rg').value.trim(),
       cpf:     document.getElementById('c-cpf').value.trim(),
       cargo:   document.getElementById('c-cargo').value.trim().toUpperCase(),
       empresa: document.getElementById('c-empresa').value.trim().toUpperCase(),
     });
+    lastCadastroSaved = {
+      _id: newId, nome, motivo,
+      rg:      document.getElementById('c-rg').value.trim(),
+      cpf:     document.getElementById('c-cpf').value.trim(),
+      cargo:   document.getElementById('c-cargo').value.trim().toUpperCase(),
+      empresa: document.getElementById('c-empresa').value.trim().toUpperCase(),
+    };
     clearForm('c');
     showToast('✅ Cadastro registrado com sucesso!');
+    showEntradaBalloon(lastCadastroSaved);
   } catch(e) {
     showToast('❌ Erro ao salvar: ' + e.message, 'error');
   } finally {
@@ -2219,6 +2517,246 @@ async function qsRegistrarSaida(dadoId) {
 // ═══════════════════════════════════════════════════════════════
 // INIT
 // ═══════════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════════
+// BALLOON — Registrar Entrada após Cadastro
+// ═══════════════════════════════════════════════════════════════
+let balloonTimeout = null;
+
+function showEntradaBalloon(pessoa) {
+  lastCadastroSaved = pessoa;
+  const balloon = document.getElementById('entrada-balloon');
+  const subEl = document.getElementById('balloon-nome-text');
+  const primeiroNome = (pessoa.nome || '').split(' ')[0];
+  subEl.textContent = `Deseja registrar a entrada de ${primeiroNome} agora?`;
+  balloon.style.display = 'block';
+  balloon.style.animation = 'none';
+  balloon.offsetHeight; // reflow
+  balloon.style.animation = 'balloonPop .35s cubic-bezier(.34,1.56,.64,1) forwards';
+  clearTimeout(balloonTimeout);
+  balloonTimeout = setTimeout(closeBalloon, 15000);
+}
+
+function closeBalloon() {
+  const balloon = document.getElementById('entrada-balloon');
+  balloon.style.display = 'none';
+  clearTimeout(balloonTimeout);
+}
+
+async function balloonRegistrarEntrada() {
+  if (!lastCadastroSaved) { closeBalloon(); return; }
+  const r = lastCadastroSaved;
+  const now = new Date();
+  const hoje = todayStr();
+  const entrada = now.toTimeString().slice(0,5);
+  closeBalloon();
+  try {
+    await addToFirestore('dados', {
+      data: hoje, nome: r.nome, rg: r.rg||'', cpf: r.cpf||'',
+      cargo: r.cargo||'', empresa: r.empresa||'',
+      placa: '', placaTrailer: '', entrada, saida: '',
+    });
+    showToast(`🟢 Entrada de ${r.nome.split(' ')[0]} registrada: ${entrada}`);
+  } catch(e) {
+    showToast('❌ Erro ao registrar entrada: ' + e.message, 'error');
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════
+// RELATÓRIOS — Funções de exportação e estatísticas
+// ═══════════════════════════════════════════════════════════════
+
+function getRelFiltrados() {
+  const di = document.getElementById('rel-data-inicio').value;
+  const df = document.getElementById('rel-data-fim').value;
+  const empresa = (document.getElementById('rel-empresa')||{value:''}).value;
+  const cargo = (document.getElementById('rel-cargo')||{value:''}).value;
+  return db.dados.filter(r => {
+    let dateOk = true;
+    if ((di || df) && r.data) {
+      const [d2,m2,y2] = r.data.split('/');
+      const rDate = new Date(`${y2}-${m2}-${d2}`);
+      if (di && rDate < new Date(di)) dateOk = false;
+      if (df && rDate > new Date(df + 'T23:59:59')) dateOk = false;
+    }
+    const eOk = !empresa || (r.empresa||'').toUpperCase() === empresa.toUpperCase();
+    const cOk = !cargo || (r.cargo||'').toUpperCase() === cargo.toUpperCase();
+    return dateOk && eOk && cOk;
+  });
+}
+
+function renderRelatoriosStats() {
+  // Update filter dropdowns
+  const empresaOpts = db.empresa.map(x => x.nome).sort();
+  const cargoOpts = [...new Set([...db.cargo.map(x=>x.nome), ...db.funcao.map(x=>x.nome)])].sort();
+  function updateSelect(id, opts, placeholder) {
+    const el = document.getElementById(id); if (!el) return;
+    const cur = el.value;
+    el.innerHTML = `<option value="">${placeholder}</option>` + opts.map(o => `<option value="${o}" ${o===cur?'selected':''}>${o}</option>`).join('');
+  }
+  updateSelect('rel-empresa', empresaOpts, 'Todas as empresas');
+  updateSelect('rel-cargo', cargoOpts, 'Todos os cargos');
+
+  const totalCad = db.cadastro.length;
+  const totalAcessos = db.dados.length;
+  const hoje = todayStr();
+  const acessosHoje = db.dados.filter(r => r.data === hoje).length;
+  const dentroPessoal = db.dados.filter(r => r.data === hoje && r.entrada && !r.saida).length;
+
+  document.getElementById('stats-relatorios').innerHTML = `
+    <div class="stat-card"><div class="stat-value">${totalCad}</div><div class="stat-label">Total Cadastros</div></div>
+    <div class="stat-card"><div class="stat-value">${totalAcessos}</div><div class="stat-label">Total Acessos</div></div>
+    <div class="stat-card"><div class="stat-value">${acessosHoje}</div><div class="stat-label">Acessos Hoje</div></div>
+    <div class="stat-card"><div class="stat-value">${dentroPessoal}</div><div class="stat-label">Dentro Agora</div></div>
+  `;
+
+  // Simple bar chart - acessos por empresa (top 8)
+  const empresaCount = {};
+  db.dados.forEach(r => {
+    const emp = r.empresa || 'Sem Empresa';
+    empresaCount[emp] = (empresaCount[emp] || 0) + 1;
+  });
+  const sorted = Object.entries(empresaCount).sort((a,b) => b[1]-a[1]).slice(0, 8);
+
+  const canvas = document.getElementById('rel-chart-bar');
+  if (!canvas || !sorted.length) return;
+  const ctx = canvas.getContext('2d');
+  const w = canvas.parentElement.clientWidth - 32;
+  canvas.width = w; canvas.height = 200;
+  const barW = Math.min(60, (w - 40) / sorted.length - 8);
+  const maxVal = sorted[0][1];
+  const padL = 20, padB = 45, padT = 20;
+  const chartH = canvas.height - padB - padT;
+
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  const colors = ['#f5a623','#3dba7c','#4a9eff','#e05555','#b88ef5','#ff9d6e','#2de096','#ffd700'];
+
+  sorted.forEach(([emp, cnt], i) => {
+    const x = padL + i * ((w - padL) / sorted.length) + ((w - padL) / sorted.length - barW) / 2;
+    const barH = Math.round((cnt / maxVal) * chartH);
+    const y = padT + chartH - barH;
+    const col = colors[i % colors.length];
+
+    ctx.fillStyle = col + '33';
+    ctx.fillRect(x, padT, barW, chartH);
+
+    const grad = ctx.createLinearGradient(x, y, x, y + barH);
+    grad.addColorStop(0, col);
+    grad.addColorStop(1, col + '88');
+    ctx.fillStyle = grad;
+    ctx.beginPath();
+    ctx.roundRect ? ctx.roundRect(x, y, barW, barH, [4, 4, 0, 0]) : ctx.rect(x, y, barW, barH);
+    ctx.fill();
+
+    ctx.fillStyle = '#e8eaf0';
+    ctx.font = 'bold 11px DM Mono, monospace';
+    ctx.textAlign = 'center';
+    ctx.fillText(cnt, x + barW / 2, y - 5);
+
+    ctx.fillStyle = '#7a8099';
+    ctx.font = '10px DM Sans, sans-serif';
+    ctx.save();
+    ctx.translate(x + barW / 2, canvas.height - 5);
+    ctx.rotate(-0.45);
+    const label = emp.length > 12 ? emp.slice(0, 11) + '…' : emp;
+    ctx.fillText(label, 0, 0);
+    ctx.restore();
+  });
+}
+
+// ── Export PDF (print-based) ──
+function exportRelatorioPDF(type) {
+  const data = type === 'cadastro' ? db.cadastro : db.dados;
+  _printTable(type, data, `Relatório de ${type === 'cadastro' ? 'Cadastros' : 'Acessos'}`);
+}
+
+function exportRelatorioFiltradoPDF() {
+  _printTable('dados', getRelFiltrados(), 'Relatório de Acessos — Filtrado');
+}
+
+function _printTable(type, data, titulo) {
+  const hoje = new Date().toLocaleDateString('pt-BR');
+  const headers = type === 'cadastro'
+    ? ['Nome','RG','CPF','Cargo','Empresa','Motivo']
+    : ['Data','Placa','Trailer','Nome','RG','CPF','Cargo','Empresa','Entrada','Saída'];
+  const keys = type === 'cadastro'
+    ? ['nome','rg','cpf','cargo','empresa','motivo']
+    : ['data','placa','placaTrailer','nome','rg','cpf','cargo','empresa','entrada','saida'];
+
+  const rows = data.map(r =>
+    '<tr>' + keys.map(k => `<td>${r[k]||''}</td>`).join('') + '</tr>'
+  ).join('');
+
+  const win = window.open('', '_blank');
+  win.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8">
+  <title>${titulo}</title>
+  <style>
+    body { font-family: Arial, sans-serif; font-size: 11px; margin: 20px; color: #222; }
+    h2 { color: #c67a00; margin-bottom: 4px; }
+    .meta { color: #666; font-size: 10px; margin-bottom: 16px; }
+    table { width: 100%; border-collapse: collapse; }
+    th { background: #1a1a2e; color: #f5a623; text-align: left; padding: 7px 8px; font-size: 10px; text-transform: uppercase; letter-spacing: .06em; }
+    td { padding: 6px 8px; border-bottom: 1px solid #ddd; }
+    tr:nth-child(even) td { background: #f9f9f9; }
+    @media print { @page { margin: 1cm; } }
+  </style>
+  </head><body>
+  <h2>🔐 CONTROLE DE ACESSO — ${titulo.toUpperCase()}</h2>
+  <div class="meta">Gerado em: ${hoje} · Total: ${data.length} registros</div>
+  <table><thead><tr>${headers.map(h=>`<th>${h}</th>`).join('')}</tr></thead>
+  <tbody>${rows}</tbody></table>
+  </body></html>`);
+  win.document.close();
+  win.focus();
+  setTimeout(() => win.print(), 500);
+  showToast('📄 PDF aberto para impressão!');
+}
+
+// ── Export Excel (SheetJS) ──
+function exportExcel(type) {
+  const data = type === 'cadastro' ? db.cadastro : db.dados;
+  _exportXlsx(type, data, `controle_acesso_${type}`);
+}
+
+function exportRelatorioFiltradoExcel() {
+  _exportXlsx('dados', getRelFiltrados(), 'controle_acesso_acessos_filtrado');
+}
+
+function _exportXlsx(type, data, filename) {
+  if (typeof XLSX === 'undefined') {
+    showToast('⚠ Biblioteca Excel não carregada ainda. Tente novamente.', 'error'); return;
+  }
+  const headers = type === 'cadastro'
+    ? ['NOME','RG','CPF','CARGO','EMPRESA','MOTIVO']
+    : ['DATA','PLACA','PLACA_TRAILER','NOME','RG','CPF','CARGO','EMPRESA','ENTRADA','SAÍDA'];
+  const keys = type === 'cadastro'
+    ? ['nome','rg','cpf','cargo','empresa','motivo']
+    : ['data','placa','placaTrailer','nome','rg','cpf','cargo','empresa','entrada','saida'];
+
+  const rows = data.map(r => keys.map(k => r[k] || ''));
+  const ws = XLSX.utils.aoa_to_sheet([headers, ...rows]);
+
+  // Style header row width
+  ws['!cols'] = headers.map(() => ({ wch: 20 }));
+
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, type === 'cadastro' ? 'Cadastros' : 'Acessos');
+  XLSX.writeFile(wb, `${filename}_${new Date().toISOString().slice(0,10)}.xlsx`);
+  showToast('📗 Excel exportado com sucesso!');
+}
+
+// ── Export CSV Filtrado ──
+function exportRelatorioFiltradoCSV() {
+  const data = getRelFiltrados();
+  const headers = ['DATA','PLACA','PLACA_TRAILER','NOME','RG','CPF','CARGO','EMPRESA','ENTRADA','SAIDA'];
+  const keys = ['data','placa','placaTrailer','nome','rg','cpf','cargo','empresa','entrada','saida'];
+  const csv = [headers.join(';'), ...data.map(r => keys.map(k => `"${(r[k]||'').replace(/"/g,'""')}"`).join(';'))].join('\n');
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob(['\uFEFF'+csv], { type:'text/csv;charset=utf-8' }));
+  a.download = `controle_acesso_filtrado_${new Date().toISOString().slice(0,10)}.csv`;
+  a.click();
+  showToast('📊 CSV filtrado exportado!');
+}
+
 initFirebase();
 </script>
 </body>
