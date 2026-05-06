@@ -752,122 +752,6 @@
   .search-by-wrap { display: flex; gap: .5rem; align-items: center; flex: 1; min-width: 260px; }
   .search-by-select { flex: 0 0 auto; min-width: 110px; font-size: .8rem; padding: .55rem .7rem; }
 
-  /* ══════════════════════════════
-     FOTO DO CADASTRO
-  ══════════════════════════════ */
-  .cadastro-layout {
-    display: grid;
-    grid-template-columns: 140px 1fr;
-    gap: 1.5rem;
-    align-items: start;
-  }
-  @media (max-width: 600px) {
-    .cadastro-layout { grid-template-columns: 1fr; }
-    .foto-col { display: flex; flex-direction: column; align-items: center; }
-  }
-  .foto-col { display: flex; flex-direction: column; align-items: center; gap: .6rem; }
-  .foto-preview-wrap {
-    width: 120px; height: 140px;
-    border-radius: 10px;
-    border: 2px dashed var(--border);
-    background: var(--surface);
-    display: flex; align-items: center; justify-content: center;
-    overflow: hidden;
-    position: relative;
-    transition: border-color .2s;
-    cursor: pointer;
-  }
-  .foto-preview-wrap:hover { border-color: var(--accent); }
-  .foto-preview-wrap img {
-    width: 100%; height: 100%; object-fit: cover; display: none;
-    border-radius: 8px;
-  }
-  .foto-preview-wrap img.visible { display: block; }
-  .foto-placeholder {
-    display: flex; flex-direction: column; align-items: center; gap: .35rem;
-    color: var(--muted); font-size: .7rem; text-align: center; padding: .5rem;
-  }
-  .foto-placeholder span { font-size: 2rem; opacity: .4; }
-  .foto-upload-btn {
-    font-size: .72rem; font-weight: 600;
-    letter-spacing: .06em; text-transform: uppercase;
-    padding: .4rem .8rem;
-    border: 1px solid var(--border);
-    border-radius: 7px; background: transparent;
-    color: var(--muted); cursor: pointer;
-    transition: all .15s; width: 120px; text-align: center;
-  }
-  .foto-upload-btn:hover { border-color: var(--accent); color: var(--accent); }
-  .foto-remove-btn {
-    font-size: .68rem; color: var(--danger);
-    background: none; border: none; cursor: pointer;
-    opacity: .7; transition: opacity .15s;
-    display: none;
-  }
-  .foto-remove-btn.visible { display: block; }
-  .foto-remove-btn:hover { opacity: 1; }
-  #c-foto-input { display: none; }
-
-  /* Badge facial Intelbras na tabela */
-  .badge-facial {
-    display: inline-flex; align-items: center; gap: .25rem;
-    font-size: .65rem; font-weight: 700;
-    padding: .15rem .5rem; border-radius: 10px;
-    background: rgba(74,158,255,.12);
-    color: var(--info);
-    border: 1px solid rgba(74,158,255,.3);
-    letter-spacing: .04em; white-space: nowrap;
-  }
-  .badge-facial-no {
-    display: inline-flex; align-items: center; gap: .25rem;
-    font-size: .65rem; font-weight: 600;
-    padding: .15rem .5rem; border-radius: 10px;
-    background: rgba(122,128,153,.08);
-    color: var(--muted);
-    border: 1px solid var(--border);
-    letter-spacing: .04em; white-space: nowrap;
-  }
-
-  /* Foto miniatura na tabela */
-  .td-foto {
-    width: 36px; height: 42px;
-    border-radius: 6px; object-fit: cover;
-    border: 1px solid var(--border);
-    background: var(--highlight);
-    display: block; cursor: pointer;
-    transition: transform .15s;
-  }
-  .td-foto:hover { transform: scale(1.15); }
-  .td-foto-empty {
-    width: 36px; height: 42px;
-    border-radius: 6px; background: var(--highlight);
-    border: 1px dashed var(--border);
-    display: flex; align-items: center; justify-content: center;
-    font-size: .9rem; color: var(--muted); opacity: .5;
-  }
-
-  /* Lightbox para ampliar foto */
-  #foto-lightbox {
-    display: none; position: fixed; inset: 0;
-    background: rgba(0,0,0,.85); backdrop-filter: blur(6px);
-    z-index: 9000; align-items: center; justify-content: center;
-  }
-  #foto-lightbox.open { display: flex; }
-  #foto-lightbox img {
-    max-width: 90vw; max-height: 85vh;
-    border-radius: 14px; border: 2px solid var(--accent);
-    box-shadow: 0 20px 60px rgba(0,0,0,.8);
-  }
-  #foto-lightbox-close {
-    position: fixed; top: 1.5rem; right: 1.5rem;
-    background: var(--card); border: 1px solid var(--border);
-    color: var(--text); font-size: 1.4rem; width: 42px; height: 42px;
-    border-radius: 50%; cursor: pointer; display: flex;
-    align-items: center; justify-content: center;
-    transition: all .15s; z-index: 9001;
-  }
-  #foto-lightbox-close:hover { border-color: var(--danger); color: var(--danger); }
-
   /* ── Responsive ── */
   @media (max-width: 700px) {
     header { padding: 0 .75rem; }
@@ -1183,74 +1067,41 @@
     <div class="stats-row" id="stats-cadastro"></div>
     <div class="form-card">
       <div class="form-card-title">➕ Novo Cadastro de Visitante</div>
-
-      <!-- Input de foto oculto -->
-      <input type="file" id="c-foto-input" accept="image/*" onchange="fotoPreviewChange(this)">
-
-      <div class="cadastro-layout">
-        <!-- Coluna da Foto -->
-        <div class="foto-col">
-          <div class="foto-preview-wrap" onclick="document.getElementById('c-foto-input').click()" title="Clique para adicionar foto">
-            <img id="c-foto-img" src="" alt="Foto do visitante">
-            <div class="foto-placeholder" id="c-foto-placeholder">
-              <span>📷</span>
-              <div>Clique para<br>adicionar foto</div>
-            </div>
-          </div>
-          <button type="button" class="foto-upload-btn" onclick="document.getElementById('c-foto-input').click()">📷 Foto</button>
-          <button type="button" class="foto-remove-btn" id="c-foto-remove" onclick="fotoRemove()">✕ Remover foto</button>
+      <div class="form-grid">
+        <div class="form-group half">
+          <label>Nome Completo <span class="req">*</span></label>
+          <input type="text" id="c-nome" placeholder="Nome do visitante" autocomplete="off">
         </div>
-
-        <!-- Coluna dos Campos -->
-        <div class="form-grid">
-          <div class="form-group full">
-            <label>Nome Completo <span class="req">*</span></label>
-            <input type="text" id="c-nome" placeholder="Nome do visitante" autocomplete="off">
-          </div>
-          <div class="form-group">
-            <label>RG</label>
-            <input type="text" id="c-rg" placeholder="00.000.000-0">
-          </div>
-          <div class="form-group">
-            <label>CPF</label>
-            <input type="text" id="c-cpf" placeholder="000.000.000-00">
-          </div>
-          <div class="form-group">
-            <label>Cargo / Função</label>
-            <select id="c-cargo">
-              <option value="">Selecione o cargo...</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label>Empresa</label>
-            <select id="c-empresa">
-              <option value="">Selecione a empresa...</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label>Motivo de Entrada <span class="req">*</span></label>
-            <select id="c-motivo">
-              <option value="">Selecione...</option>
-              <option>PRESTADOR</option><option>ENTREGA</option><option>COLETA</option>
-              <option>VISITANTE</option><option>DESCARGA</option><option>ENTREVISTA</option>
-              <option>MANUTENÇÃO</option><option>FUNCIONÁRIO</option><option>OUTRO</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label>🤖 Cadastrado no Facial Intelbras</label>
-            <select id="c-facial" onchange="document.getElementById('c-facial-obs-group').style.display=this.value==='SIM'?'':'none'">
-              <option value="">Não cadastrado</option>
-              <option value="SIM">✅ Sim — Cadastrado no dispositivo</option>
-              <option value="PENDENTE">⏳ Pendente — Aguardando cadastro</option>
-            </select>
-          </div>
-          <div class="form-group" id="c-facial-obs-group" style="display:none;">
-            <label>Nº Matrícula / ID no Dispositivo</label>
-            <input type="text" id="c-facial-id" placeholder="ID no Intelbras (opcional)">
-          </div>
+        <div class="form-group">
+          <label>RG</label>
+          <input type="text" id="c-rg" placeholder="00.000.000-0">
+        </div>
+        <div class="form-group">
+          <label>CPF</label>
+          <input type="text" id="c-cpf" placeholder="000.000.000-00">
+        </div>
+        <div class="form-group half">
+          <label>Cargo / Função</label>
+          <select id="c-cargo">
+            <option value="">Selecione o cargo...</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Empresa</label>
+          <select id="c-empresa">
+            <option value="">Selecione a empresa...</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Motivo de Entrada <span class="req">*</span></label>
+          <select id="c-motivo">
+            <option value="">Selecione...</option>
+            <option>PRESTADOR</option><option>ENTREGA</option><option>COLETA</option>
+            <option>VISITANTE</option><option>DESCARGA</option><option>ENTREVISTA</option>
+            <option>MANUTENÇÃO</option><option>FUNCIONÁRIO</option><option>OUTRO</option>
+          </select>
         </div>
       </div>
-
       <div class="btn-row">
         <button class="btn btn-primary" id="btn-save-cadastro" onclick="addCadastro()">💾 Salvar Cadastro</button>
         <button class="btn btn-outline" onclick="clearForm('c')">✕ Limpar</button>
@@ -1278,14 +1129,12 @@
       <table id="tbl-cadastro">
         <thead>
           <tr>
-            <th>Foto</th>
             <th onclick="sortTable('cadastro',0)">Nome <span class="sort-icon">↕</span></th>
             <th onclick="sortTable('cadastro',1)">RG <span class="sort-icon">↕</span></th>
             <th onclick="sortTable('cadastro',2)">CPF <span class="sort-icon">↕</span></th>
             <th onclick="sortTable('cadastro',3)">Cargo / Função <span class="sort-icon">↕</span></th>
             <th onclick="sortTable('cadastro',4)">Empresa <span class="sort-icon">↕</span></th>
             <th onclick="sortTable('cadastro',5)">Motivo Entrada <span class="sort-icon">↕</span></th>
-            <th>Facial Intelbras</th>
             <th>Ações</th>
           </tr>
         </thead>
@@ -1676,12 +1525,6 @@
     </div>
   </div>
 </main>
-
-<!-- ══ FOTO LIGHTBOX ══ -->
-<div id="foto-lightbox" onclick="closeLightbox()">
-  <button id="foto-lightbox-close" onclick="closeLightbox()">✕</button>
-  <img id="foto-lightbox-img" src="" alt="Foto ampliada">
-</div>
 
 <!-- ══ MODAL (edit) ══ -->
 <div class="modal-overlay" id="modal-overlay">
@@ -2426,30 +2269,20 @@ async function addCadastro() {
   const btn = document.getElementById('btn-save-cadastro');
   btn.disabled = true; btn.textContent = '⏳ Salvando...';
 
-  // Captura foto como base64 (se houver)
-  const fotoImg = document.getElementById('c-foto-img');
-  const foto = (fotoImg && fotoImg.src && fotoImg.src.startsWith('data:')) ? fotoImg.src : '';
-
   try {
     const newId = await addToFirestore('cadastro', {
       nome, motivo,
-      rg:       document.getElementById('c-rg').value.trim(),
-      cpf:      document.getElementById('c-cpf').value.trim(),
-      cargo:    document.getElementById('c-cargo').value.trim().toUpperCase(),
-      empresa:  document.getElementById('c-empresa').value.trim().toUpperCase(),
-      facial:   document.getElementById('c-facial').value || '',
-      facialId: document.getElementById('c-facial-id').value.trim(),
-      foto,
+      rg:      document.getElementById('c-rg').value.trim(),
+      cpf:     document.getElementById('c-cpf').value.trim(),
+      cargo:   document.getElementById('c-cargo').value.trim().toUpperCase(),
+      empresa: document.getElementById('c-empresa').value.trim().toUpperCase(),
     });
     lastCadastroSaved = {
       _id: newId, nome, motivo,
-      rg:       document.getElementById('c-rg').value.trim(),
-      cpf:      document.getElementById('c-cpf').value.trim(),
-      cargo:    document.getElementById('c-cargo').value.trim().toUpperCase(),
-      empresa:  document.getElementById('c-empresa').value.trim().toUpperCase(),
-      facial:   document.getElementById('c-facial').value || '',
-      facialId: document.getElementById('c-facial-id').value.trim(),
-      foto,
+      rg:      document.getElementById('c-rg').value.trim(),
+      cpf:     document.getElementById('c-cpf').value.trim(),
+      cargo:   document.getElementById('c-cargo').value.trim().toUpperCase(),
+      empresa: document.getElementById('c-empresa').value.trim().toUpperCase(),
     };
     clearForm('c');
     showToast('✅ Cadastro registrado com sucesso!');
@@ -2505,10 +2338,6 @@ function clearForm(prefix) {
     document.getElementById('c-cargo').value = '';
     document.getElementById('c-empresa').value = '';
     document.getElementById('c-motivo').value = '';
-    document.getElementById('c-facial').value = '';
-    document.getElementById('c-facial-id').value = '';
-    document.getElementById('c-facial-obs-group').style.display = 'none';
-    fotoRemove();
   } else {
     ['d-placa','d-placa-trailer','d-nome','d-rg','d-cpf','d-entrada','d-saida'].forEach(id => document.getElementById(id).value = '');
     document.getElementById('d-cargo').value = '';
@@ -2603,18 +2432,12 @@ function renderTable(type) {
   if (type === 'cadastro') {
     tbody.innerHTML = slice.map(r => `
       <tr>
-        <td style="width:50px;text-align:center;">
-          ${r.foto
-            ? `<img class="td-foto" src="${r.foto}" alt="Foto" onclick="openLightbox('${r.foto.replace(/'/g,"\\'")}', '${(r.nome||'').replace(/'/g,"\\'")}')">` 
-            : `<div class="td-foto-empty">👤</div>`}
-        </td>
         <td class="td-name">${r.nome}</td>
         <td class="td-mono">${r.rg || '—'}</td>
         <td class="td-mono">${r.cpf || '—'}</td>
         <td>${r.cargo || '—'}</td>
         <td>${r.empresa || '—'}</td>
         <td>${motivoBadge(r.motivo)}</td>
-        <td>${facialBadge(r.facial, r.facialId)}</td>
         <td>
           <button class="action-btn" title="Editar" onclick="editRow('cadastro','${r._id}')">✏️</button>
           <button class="action-btn del" title="Excluir" onclick="deleteRow('cadastro','${r._id}')">🗑</button>
@@ -2649,95 +2472,6 @@ function motivoBadge(m) {
   const colors = { 'VISITANTE':'badge-in','ENTREGA':'badge-open','DESCARGA':'badge-open','COLETA':'badge-open','ENTREVISTA':'badge-in','PRESTADOR':'badge-out','MANUTENÇÃO':'badge-out','FUNCIONÁRIO':'badge-in' };
   return `<span class="badge ${colors[m]||'badge-out'}">${m||'—'}</span>`;
 }
-function facialBadge(facial, facialId) {
-  if (facial === 'SIM') {
-    const id = facialId ? ` #${facialId}` : '';
-    return `<span class="badge-facial">🤖 Intelbras${id}</span>`;
-  }
-  if (facial === 'PENDENTE') {
-    return `<span class="badge-facial" style="background:rgba(245,166,35,.1);color:var(--accent);border-color:rgba(245,166,35,.3);">⏳ Pendente</span>`;
-  }
-  return `<span class="badge-facial-no">— Não cadastrado</span>`;
-}
-
-// ═══════════════════════════════════════════════════════════════
-// FOTO DO CADASTRO
-// ═══════════════════════════════════════════════════════════════
-function fotoPreviewChange(input) {
-  if (!input.files || !input.files[0]) return;
-  const file = input.files[0];
-  const reader = new FileReader();
-  reader.onload = function(e) {
-    // Redimensionar para economizar espaço no Firestore (max 200x240px)
-    const img = new Image();
-    img.onload = function() {
-      const canvas = document.createElement('canvas');
-      const maxW = 200, maxH = 240;
-      let w = img.width, h = img.height;
-      if (w / h > maxW / maxH) { w = maxW; h = Math.round(img.height * maxW / img.width); }
-      else { h = maxH; w = Math.round(img.width * maxH / img.height); }
-      canvas.width = w; canvas.height = h;
-      canvas.getContext('2d').drawImage(img, 0, 0, w, h);
-      const dataUrl = canvas.toDataURL('image/jpeg', 0.82);
-      const previewImg = document.getElementById('c-foto-img');
-      previewImg.src = dataUrl;
-      previewImg.classList.add('visible');
-      document.getElementById('c-foto-placeholder').style.display = 'none';
-      document.getElementById('c-foto-remove').classList.add('visible');
-    };
-    img.src = e.target.result;
-  };
-  reader.readAsDataURL(file);
-  input.value = '';
-}
-
-function fotoRemove() {
-  const img = document.getElementById('c-foto-img');
-  img.src = '';
-  img.classList.remove('visible');
-  document.getElementById('c-foto-placeholder').style.display = '';
-  document.getElementById('c-foto-remove').classList.remove('visible');
-}
-
-function mFotoChange(input) {
-  if (!input.files || !input.files[0]) return;
-  const reader = new FileReader();
-  reader.onload = function(e) {
-    const img2 = new Image();
-    img2.onload = function() {
-      const canvas = document.createElement('canvas');
-      const maxW = 200, maxH = 240;
-      let w = img2.width, h = img2.height;
-      if (w / h > maxW / maxH) { w = maxW; h = Math.round(img2.height * maxW / img2.width); }
-      else { h = maxH; w = Math.round(img2.width * maxH / img2.height); }
-      canvas.width = w; canvas.height = h;
-      canvas.getContext('2d').drawImage(img2, 0, 0, w, h);
-      const dataUrl = canvas.toDataURL('image/jpeg', 0.82);
-      const mImg = document.getElementById('m-foto-img');
-      if (mImg) {
-        mImg.src = dataUrl;
-        mImg.classList.add('visible');
-        const ph = document.getElementById('m-foto-placeholder');
-        if (ph) ph.style.display = 'none';
-      }
-    };
-    img2.src = e.target.result;
-  };
-  reader.readAsDataURL(input.files[0]);
-  input.value = '';
-}
-
-function openLightbox(src, nome) {
-  const lb = document.getElementById('foto-lightbox');
-  document.getElementById('foto-lightbox-img').src = src;
-  lb.classList.add('open');
-}
-function closeLightbox() {
-  document.getElementById('foto-lightbox').classList.remove('open');
-}
-document.addEventListener('keydown', e => { if (e.key === 'Escape') closeLightbox(); });
-
-// Toggle campo ID Intelbras ao selecionar "Sim" — handled via onchange in HTML select
 function statusBadge(r) {
   if (r.entrada && r.saida) return `<span class="badge badge-out">✓ Saiu</span>`;
   if (r.entrada && !r.saida) return `<span class="badge badge-open">● Dentro</span>`;
@@ -2845,20 +2579,7 @@ function editRow(type, id) {
   if (type === 'cadastro') {
     document.getElementById('modal-body').innerHTML = `
       <div class="form-grid">
-        <div class="form-group full" style="display:flex;gap:1rem;align-items:flex-start;flex-wrap:wrap;">
-          <div style="display:flex;flex-direction:column;align-items:center;gap:.5rem;">
-            <div class="foto-preview-wrap" style="cursor:pointer;width:100px;height:120px;" onclick="document.getElementById('m-foto-input').click()">
-              <img id="m-foto-img" src="${r.foto||''}" alt="Foto" class="${r.foto?'visible':''}">
-              <div class="foto-placeholder" id="m-foto-placeholder" style="${r.foto?'display:none':''}"><span>📷</span><div style="font-size:.65rem;">Alterar foto</div></div>
-            </div>
-            <input type="file" id="m-foto-input" accept="image/*" style="display:none" onchange="mFotoChange(this)">
-            <button type="button" onclick="document.getElementById('m-foto-input').click()" style="font-size:.7rem;padding:.3rem .6rem;border:1px solid var(--border);border-radius:6px;background:transparent;color:var(--muted);cursor:pointer;">📷 Trocar</button>
-          </div>
-          <div style="flex:1;min-width:200px;">
-            <label style="font-size:.72rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:.4rem;">Nome</label>
-            <input id="m-nome" value="${r.nome||''}" style="width:100%">
-          </div>
-        </div>
+        <div class="form-group half"><label>Nome</label><input id="m-nome" value="${r.nome||''}"></div>
         <div class="form-group"><label>RG</label><input id="m-rg" value="${r.rg||''}"></div>
         <div class="form-group"><label>CPF</label><input id="m-cpf" value="${r.cpf||''}"></div>
         <div class="form-group half"><label>Cargo</label>
@@ -2872,17 +2593,6 @@ function editRow(type, id) {
             ${['PRESTADOR','ENTREGA','COLETA','VISITANTE','DESCARGA','ENTREVISTA','MANUTENÇÃO','FUNCIONÁRIO','OUTRO']
               .map(m=>`<option ${r.motivo===m?'selected':''}>${m}</option>`).join('')}
           </select>
-        </div>
-        <div class="form-group"><label>🤖 Facial Intelbras</label>
-          <select id="m-facial" onchange="document.getElementById('m-facial-id-group').style.display=this.value==='SIM'?'':'none'">
-            <option value="" ${!r.facial?'selected':''}>Não cadastrado</option>
-            <option value="SIM" ${r.facial==='SIM'?'selected':''}>✅ Sim — Cadastrado no dispositivo</option>
-            <option value="PENDENTE" ${r.facial==='PENDENTE'?'selected':''}>⏳ Pendente — Aguardando cadastro</option>
-          </select>
-        </div>
-        <div class="form-group" id="m-facial-id-group" style="display:${r.facial==='SIM'?'':'none'};">
-          <label>Nº Matrícula / ID no Dispositivo</label>
-          <input id="m-facial-id" value="${r.facialId||''}" placeholder="ID no Intelbras">
         </div>
       </div>`;
   } else {
@@ -2924,16 +2634,7 @@ document.getElementById('modal-save-btn').onclick = async function() {
   };
 
   if (type === 'cadastro') {
-    updates.motivo   = document.getElementById('m-motivo').value;
-    updates.facial   = (document.getElementById('m-facial')||{value:''}).value || '';
-    updates.facialId = (document.getElementById('m-facial-id')||{value:''}).value.trim();
-    // Captura foto do modal se alterada
-    const mFotoImg = document.getElementById('m-foto-img');
-    if (mFotoImg && mFotoImg.src && mFotoImg.src.startsWith('data:')) {
-      updates.foto = mFotoImg.src;
-    } else if (mFotoImg && !mFotoImg.src) {
-      updates.foto = '';
-    }
+    updates.motivo = document.getElementById('m-motivo').value;
   } else {
     updates.placa        = document.getElementById('m-placa').value.trim().toUpperCase();
     updates.placaTrailer = document.getElementById('m-placa-trailer').value.trim().toUpperCase();
