@@ -900,27 +900,37 @@
   /* ══════════════════════════════
      QS CONFIRM BALLOON
   ══════════════════════════════ */
+  @keyframes qsBalloonPop {
+    from { opacity: 0; transform: scale(.75) translateY(24px); }
+    to   { opacity: 1; transform: scale(1) translateY(0); }
+  }
   .qs-confirm-balloon {
     position: fixed;
     bottom: 5.5rem;
     right: 2rem;
-    z-index: 600;
-    filter: drop-shadow(0 8px 32px rgba(0,0,0,.65));
+    z-index: 9999;
+    filter: drop-shadow(0 8px 32px rgba(0,0,0,.75));
     max-width: 380px;
     width: calc(100vw - 4rem);
+    animation: qsBalloonPop .35s cubic-bezier(.34,1.56,.64,1) both;
   }
-  .qs-confirm-balloon .balloon-arrow {
-    border-top-color: #1a2235;
+  .qs-confirm-balloon .qs-cb-arrow {
+    width: 0; height: 0;
+    border-left: 12px solid transparent;
+    border-right: 12px solid transparent;
+    border-top: 12px solid #1a2235;
+    margin-left: auto;
+    margin-right: 2rem;
   }
-  .qs-confirm-balloon .balloon-body {
+  .qs-confirm-balloon .qs-cb-body {
     background: #1a2235;
-    border: 1px solid rgba(74,158,255,.45);
+    border: 1.5px solid rgba(74,158,255,.55);
     border-radius: 14px;
     padding: 1.25rem 1.5rem;
     display: flex;
     flex-direction: column;
     gap: .85rem;
-    box-shadow: inset 0 1px 0 rgba(255,255,255,.06);
+    box-shadow: 0 12px 40px rgba(0,0,0,.6), inset 0 1px 0 rgba(255,255,255,.07);
   }
   .qs-confirm-header {
     display: flex; align-items: center; gap: .6rem;
@@ -1648,9 +1658,9 @@
 </div>
 
 <!-- QS CONFIRM BALLOON -->
-<div id="qs-confirm-balloon" class="qs-confirm-balloon entrada-balloon" style="display:none;">
-  <div class="balloon-arrow"></div>
-  <div class="balloon-body">
+<div id="qs-confirm-balloon" class="qs-confirm-balloon" style="display:none;">
+  <div class="qs-cb-arrow"></div>
+  <div class="qs-cb-body">
     <div class="qs-confirm-header">
       <div class="qs-confirm-icon">🔍</div>
       <div>
@@ -2971,7 +2981,7 @@ function qsRegistrarEntrada(cadastroId) {
   balloon.style.display = 'block';
   balloon.style.animation = 'none';
   balloon.offsetHeight;
-  balloon.style.animation = 'balloonPop .35s cubic-bezier(.34,1.56,.64,1) forwards';
+  balloon.style.animation = 'qsBalloonPop .35s cubic-bezier(.34,1.56,.64,1) both';
 
   clearTimeout(qsConfirmTimeout);
   qsConfirmTimeout = setTimeout(closeQsConfirm, 20000);
