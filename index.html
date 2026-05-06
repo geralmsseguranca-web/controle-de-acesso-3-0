@@ -898,6 +898,95 @@
   .balloon-btn-no:hover { border-color: var(--danger); color: var(--danger); }
 
   /* ══════════════════════════════
+     QS CONFIRM BALLOON
+  ══════════════════════════════ */
+  .qs-confirm-balloon {
+    position: fixed;
+    bottom: 5.5rem;
+    right: 2rem;
+    z-index: 600;
+    filter: drop-shadow(0 8px 32px rgba(0,0,0,.65));
+    max-width: 380px;
+    width: calc(100vw - 4rem);
+  }
+  .qs-confirm-balloon .balloon-arrow {
+    border-top-color: #1a2235;
+  }
+  .qs-confirm-balloon .balloon-body {
+    background: #1a2235;
+    border: 1px solid rgba(74,158,255,.45);
+    border-radius: 14px;
+    padding: 1.25rem 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: .85rem;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.06);
+  }
+  .qs-confirm-header {
+    display: flex; align-items: center; gap: .6rem;
+    border-bottom: 1px solid rgba(255,255,255,.07);
+    padding-bottom: .75rem;
+  }
+  .qs-confirm-icon { font-size: 1.6rem; }
+  .qs-confirm-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.15rem; letter-spacing: .06em;
+    color: var(--info);
+  }
+  .qs-confirm-subtitle { font-size: .75rem; color: var(--muted); margin-top: 1px; }
+  .qs-confirm-card {
+    background: rgba(255,255,255,.04);
+    border: 1px solid rgba(255,255,255,.08);
+    border-radius: 10px;
+    padding: .85rem 1rem;
+    display: flex; flex-direction: column; gap: .4rem;
+  }
+  .qs-confirm-name {
+    font-weight: 700; font-size: 1rem; color: var(--text);
+    display: flex; align-items: center; gap: .5rem;
+  }
+  .qs-confirm-badge {
+    font-size: .65rem; font-weight: 600;
+    background: rgba(74,158,255,.18);
+    color: var(--info);
+    border: 1px solid rgba(74,158,255,.3);
+    border-radius: 4px; padding: 1px 6px;
+    text-transform: uppercase; letter-spacing: .04em;
+  }
+  .qs-confirm-meta {
+    font-size: .78rem; color: var(--muted);
+    display: flex; flex-wrap: wrap; gap: .3rem .75rem;
+  }
+  .qs-confirm-meta span { display: flex; align-items: center; gap: .25rem; }
+  .qs-confirm-time {
+    font-size: .8rem; color: var(--success);
+    font-weight: 600;
+    display: flex; align-items: center; gap: .4rem;
+  }
+  .qs-confirm-actions { display: flex; gap: .6rem; flex-direction: column; }
+  .qs-confirm-btn-yes {
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 700; font-size: .9rem;
+    padding: .75rem 1rem; border: none; border-radius: 9px;
+    background: linear-gradient(135deg, #3dba7c, #27ae60);
+    color: #fff; cursor: pointer;
+    transition: all .18s;
+    box-shadow: 0 3px 12px rgba(61,186,124,.4);
+    display: flex; align-items: center; justify-content: center; gap: .45rem;
+  }
+  .qs-confirm-btn-yes:hover { filter: brightness(1.1); transform: translateY(-1px); }
+  .qs-confirm-btn-no {
+    font-family: 'DM Sans', sans-serif;
+    font-size: .8rem; font-weight: 600;
+    padding: .5rem; border: 1px solid var(--border);
+    border-radius: 8px; background: transparent;
+    color: var(--muted); cursor: pointer;
+    transition: all .15s;
+    display: flex; align-items: center; justify-content: center; gap: .4rem;
+  }
+  .qs-confirm-btn-no:hover { border-color: var(--danger); color: var(--danger); }
+
+  /* ══════════════════════════════
      OFFLINE / SYNC BANNERS
   ══════════════════════════════ */
   #offline-banner {
@@ -1554,6 +1643,37 @@
     <div class="balloon-actions">
       <button class="balloon-btn-yes" id="balloon-btn-sim" onclick="balloonRegistrarEntrada()">✅ Sim, registrar entrada</button>
       <button class="balloon-btn-no" onclick="closeBalloon()">✕ Não agora</button>
+    </div>
+  </div>
+</div>
+
+<!-- QS CONFIRM BALLOON -->
+<div id="qs-confirm-balloon" class="qs-confirm-balloon entrada-balloon" style="display:none;">
+  <div class="balloon-arrow"></div>
+  <div class="balloon-body">
+    <div class="qs-confirm-header">
+      <div class="qs-confirm-icon">🔍</div>
+      <div>
+        <div class="qs-confirm-title">Confirmar Entrada</div>
+        <div class="qs-confirm-subtitle">Cadastro encontrado — confirme o registro</div>
+      </div>
+    </div>
+    <div class="qs-confirm-card">
+      <div class="qs-confirm-name">
+        <span id="qsc-nome">—</span>
+        <span class="qs-confirm-badge" id="qsc-motivo">—</span>
+      </div>
+      <div class="qs-confirm-meta">
+        <span id="qsc-rg-wrap" style="display:none">🪪 <span id="qsc-rg"></span></span>
+        <span id="qsc-cpf-wrap" style="display:none">📄 <span id="qsc-cpf"></span></span>
+        <span id="qsc-empresa-wrap" style="display:none">🏢 <span id="qsc-empresa"></span></span>
+        <span id="qsc-cargo-wrap" style="display:none">💼 <span id="qsc-cargo"></span></span>
+      </div>
+      <div class="qs-confirm-time">🕐 Entrada: <span id="qsc-hora">--:--</span></div>
+    </div>
+    <div class="qs-confirm-actions">
+      <button class="qs-confirm-btn-yes" onclick="qsConfirmEntrada()">✅ Confirmar Entrada</button>
+      <button class="qs-confirm-btn-no" onclick="closeQsConfirm()">✕ Cancelar</button>
     </div>
   </div>
 </div>
@@ -2821,12 +2941,55 @@ function qsSearch() {
   wrap.classList.add('open');
 }
 
-async function qsRegistrarEntrada(cadastroId) {
+// ─── QS CONFIRM BALLOON STATE ───
+let qsConfirmData = null;
+let qsConfirmTimeout = null;
+
+function qsRegistrarEntrada(cadastroId) {
   const r = db.cadastro.find(x => x._id === cadastroId);
   if (!r) return;
   const now = new Date();
+  const hora = now.toTimeString().slice(0,5);
+
+  // Fill balloon data
+  qsConfirmData = { cadastroId, r };
+  document.getElementById('qsc-nome').textContent = r.nome || '—';
+  document.getElementById('qsc-motivo').textContent = r.motivo || '';
+  document.getElementById('qsc-hora').textContent = hora;
+
+  const setField = (wrapId, valId, val) => {
+    const wrap = document.getElementById(wrapId);
+    document.getElementById(valId).textContent = val;
+    wrap.style.display = val ? '' : 'none';
+  };
+  setField('qsc-rg-wrap', 'qsc-rg', r.rg || '');
+  setField('qsc-cpf-wrap', 'qsc-cpf', r.cpf || '');
+  setField('qsc-empresa-wrap', 'qsc-empresa', r.empresa || '');
+  setField('qsc-cargo-wrap', 'qsc-cargo', r.cargo || '');
+
+  const balloon = document.getElementById('qs-confirm-balloon');
+  balloon.style.display = 'block';
+  balloon.style.animation = 'none';
+  balloon.offsetHeight;
+  balloon.style.animation = 'balloonPop .35s cubic-bezier(.34,1.56,.64,1) forwards';
+
+  clearTimeout(qsConfirmTimeout);
+  qsConfirmTimeout = setTimeout(closeQsConfirm, 20000);
+}
+
+function closeQsConfirm() {
+  document.getElementById('qs-confirm-balloon').style.display = 'none';
+  clearTimeout(qsConfirmTimeout);
+  qsConfirmData = null;
+}
+
+async function qsConfirmEntrada() {
+  if (!qsConfirmData) { closeQsConfirm(); return; }
+  const { r } = qsConfirmData;
+  const now = new Date();
   const hoje = todayStr();
   const entrada = now.toTimeString().slice(0,5);
+  closeQsConfirm();
   try {
     await addToFirestore('dados', {
       data: hoje, nome: r.nome, rg: r.rg||'', cpf: r.cpf||'',
