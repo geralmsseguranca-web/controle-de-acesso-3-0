@@ -901,27 +901,28 @@
      QS CONFIRM BALLOON
   ══════════════════════════════ */
   @keyframes qsBalloonPop {
-    from { opacity: 0; transform: scale(.75) translateY(24px); }
-    to   { opacity: 1; transform: scale(1) translateY(0); }
+    from { opacity: 0; transform: scale(.8); }
+    to   { opacity: 1; transform: scale(1); }
+  }
+  .qs-confirm-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,.55);
+    backdrop-filter: blur(3px);
+    z-index: 9998;
   }
   .qs-confirm-balloon {
     position: fixed;
-    bottom: 5.5rem;
-    right: 2rem;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
     z-index: 9999;
-    filter: drop-shadow(0 8px 32px rgba(0,0,0,.75));
-    max-width: 380px;
-    width: calc(100vw - 4rem);
-    animation: qsBalloonPop .35s cubic-bezier(.34,1.56,.64,1) both;
+    filter: drop-shadow(0 16px 48px rgba(0,0,0,.85));
+    max-width: 420px;
+    width: calc(100vw - 3rem);
+    animation: qsBalloonPop .3s cubic-bezier(.34,1.56,.64,1) both;
   }
-  .qs-confirm-balloon .qs-cb-arrow {
-    width: 0; height: 0;
-    border-left: 12px solid transparent;
-    border-right: 12px solid transparent;
-    border-top: 12px solid #1a2235;
-    margin-left: auto;
-    margin-right: 2rem;
-  }
+  .qs-confirm-balloon .qs-cb-arrow { display: none; }
   .qs-confirm-balloon .qs-cb-body {
     background: #1a2235;
     border: 1.5px solid rgba(74,158,255,.55);
@@ -1658,6 +1659,7 @@
 </div>
 
 <!-- QS CONFIRM BALLOON -->
+<div id="qs-confirm-overlay" class="qs-confirm-overlay" style="display:none;" onclick="closeQsConfirm()"></div>
 <div id="qs-confirm-balloon" class="qs-confirm-balloon" style="display:none;">
   <div class="qs-cb-arrow"></div>
   <div class="qs-cb-body">
@@ -2977,11 +2979,13 @@ function qsRegistrarEntrada(cadastroId) {
   setField('qsc-empresa-wrap', 'qsc-empresa', r.empresa || '');
   setField('qsc-cargo-wrap', 'qsc-cargo', r.cargo || '');
 
+  const overlay = document.getElementById('qs-confirm-overlay');
   const balloon = document.getElementById('qs-confirm-balloon');
+  overlay.style.display = 'block';
   balloon.style.display = 'block';
   balloon.style.animation = 'none';
   balloon.offsetHeight;
-  balloon.style.animation = 'qsBalloonPop .35s cubic-bezier(.34,1.56,.64,1) both';
+  balloon.style.animation = 'qsBalloonPop .3s cubic-bezier(.34,1.56,.64,1) both';
 
   clearTimeout(qsConfirmTimeout);
   qsConfirmTimeout = setTimeout(closeQsConfirm, 20000);
@@ -2989,6 +2993,7 @@ function qsRegistrarEntrada(cadastroId) {
 
 function closeQsConfirm() {
   document.getElementById('qs-confirm-balloon').style.display = 'none';
+  document.getElementById('qs-confirm-overlay').style.display = 'none';
   clearTimeout(qsConfirmTimeout);
   qsConfirmData = null;
 }
