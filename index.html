@@ -218,6 +218,125 @@
   .hsd-no-results { padding: 1rem; text-align: center; color: var(--muted); font-size: .85rem; }
 
   /* ══════════════════════════════
+     BALÃO DE AÇÃO — Pessoa encontrada
+  ══════════════════════════════ */
+  #action-balloon-overlay {
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,.55);
+    backdrop-filter: blur(3px);
+    z-index: 8998;
+    display: none;
+  }
+  #action-balloon-overlay.open { display: block; }
+  #action-balloon {
+    position: fixed;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%) scale(0.8);
+    z-index: 8999;
+    background: var(--card);
+    border: 1px solid var(--accent);
+    border-radius: 18px;
+    padding: 1.75rem 2rem;
+    min-width: 320px;
+    max-width: 440px;
+    width: 92vw;
+    box-shadow: 0 24px 64px rgba(0,0,0,.75), 0 0 0 1px rgba(245,166,35,.15);
+    display: none;
+    animation: actionBalloonPop .32s cubic-bezier(.34,1.56,.64,1) forwards;
+  }
+  #action-balloon.open { display: block; }
+  @keyframes actionBalloonPop {
+    from { opacity: 0; transform: translate(-50%, -50%) scale(0.75); }
+    to   { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+  }
+  .acb-header {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 1rem;
+  }
+  .acb-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.1rem; letter-spacing: .07em; color: var(--accent);
+    display: flex; align-items: center; gap: .4rem;
+  }
+  .acb-close {
+    background: none; border: none; color: var(--muted);
+    cursor: pointer; font-size: 1.1rem; line-height: 1;
+    transition: color .15s;
+  }
+  .acb-close:hover { color: var(--danger); }
+  .acb-person {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: .75rem 1rem;
+    margin-bottom: 1.25rem;
+  }
+  .acb-person-name {
+    font-weight: 700; font-size: 1rem; color: var(--text);
+    margin-bottom: .25rem; display: flex; align-items: center; gap: .5rem;
+  }
+  .acb-person-meta {
+    font-size: .76rem; color: var(--muted);
+    font-family: 'DM Mono', monospace; line-height: 1.5;
+  }
+  .acb-status-badge {
+    display: inline-flex; align-items: center; gap: .3rem;
+    font-size: .68rem; font-weight: 700; letter-spacing: .04em;
+    padding: .2rem .55rem; border-radius: 20px;
+  }
+  .acb-status-inside {
+    background: rgba(61,186,124,.15); color: var(--success);
+    border: 1px solid rgba(61,186,124,.3);
+  }
+  .acb-status-outside {
+    background: rgba(122,128,153,.1); color: var(--muted);
+    border: 1px solid var(--border);
+  }
+  .acb-actions {
+    display: flex; flex-direction: column; gap: .6rem;
+  }
+  .acb-btn-entrada {
+    font-family: 'DM Sans', sans-serif;
+    font-size: .92rem; font-weight: 700;
+    padding: .75rem 1rem;
+    background: linear-gradient(135deg, #3dba7c, #27ae60);
+    color: #fff; border: none; border-radius: 10px;
+    cursor: pointer; transition: all .18s;
+    box-shadow: 0 3px 12px rgba(61,186,124,.4);
+    display: flex; align-items: center; justify-content: center; gap: .45rem;
+  }
+  .acb-btn-entrada:hover { filter: brightness(1.1); transform: translateY(-1px); }
+  .acb-btn-entrada:disabled {
+    opacity: .4; cursor: not-allowed; filter: none; transform: none;
+    background: var(--muted);
+  }
+  .acb-btn-row { display: flex; gap: .55rem; }
+  .acb-btn-editar {
+    flex: 1;
+    font-family: 'DM Sans', sans-serif;
+    font-size: .85rem; font-weight: 600;
+    padding: .65rem 1rem;
+    background: rgba(245,166,35,.1);
+    border: 1px solid rgba(245,166,35,.35); color: var(--accent);
+    border-radius: 10px; cursor: pointer; transition: all .18s;
+    display: flex; align-items: center; justify-content: center; gap: .4rem;
+  }
+  .acb-btn-editar:hover { background: rgba(245,166,35,.25); transform: translateY(-1px); }
+  .acb-btn-cancelar {
+    font-family: 'DM Sans', sans-serif;
+    font-size: .85rem; font-weight: 600;
+    padding: .65rem 1rem;
+    background: transparent;
+    border: 1px solid var(--border); color: var(--muted);
+    border-radius: 10px; cursor: pointer; transition: all .18s;
+  }
+  .acb-btn-cancelar:hover { border-color: var(--danger); color: var(--danger); }
+  .acb-hint {
+    font-size: .72rem; color: var(--muted); text-align: center;
+    margin-top: .75rem; line-height: 1.45;
+  }
+
+  /* ══════════════════════════════
      BALÃO "NÃO ENCONTRADO" — Sugerir Cadastro
   ══════════════════════════════ */
   #not-found-balloon {
@@ -1066,6 +1185,16 @@
     border-radius: 10px; cursor: pointer; transition: all .18s;
   }
   .ceb-btn-cancel:hover { border-color: var(--danger); color: var(--danger); }
+  .ceb-btn-edit {
+    font-family: 'DM Sans', sans-serif;
+    font-size: .88rem; font-weight: 600;
+    padding: .7rem 1.1rem;
+    background: rgba(245,166,35,.1);
+    border: 1px solid rgba(245,166,35,.35); color: var(--accent);
+    border-radius: 10px; cursor: pointer; transition: all .18s;
+    display: flex; align-items: center; gap: .35rem;
+  }
+  .ceb-btn-edit:hover { background: rgba(245,166,35,.25); transform: translateY(-1px); }
 
   /* ══════════════════════════════
      BALLOON POPUP — Entrada pós-cadastro
@@ -1714,6 +1843,7 @@
   <div class="ceb-time" id="ceb-time"></div>
   <div class="ceb-buttons">
     <button class="ceb-btn-confirm" onclick="confirmarEntrada()">✅ Confirmar Entrada</button>
+    <button class="ceb-btn-edit" onclick="cebEditarCadastro()">✏️ Editar</button>
     <button class="ceb-btn-cancel" onclick="cancelConfirmEntrada()">Cancelar</button>
   </div>
 </div>
@@ -1776,6 +1906,36 @@
     <button class="rvw-btn-confirm" id="rvw-btn-confirmar" onclick="confirmarCadastroEEntrada()">
       ✅ Confirmar e Liberar Entrada
     </button>
+  </div>
+</div>
+
+<!-- ══ BALÃO DE AÇÃO — Pessoa Encontrada ══ -->
+<div id="action-balloon-overlay" onclick="closeActionBalloon()"></div>
+<div id="action-balloon">
+  <div class="acb-header">
+    <div class="acb-title">🪪 Acesso Rápido</div>
+    <button class="acb-close" onclick="closeActionBalloon()">✕</button>
+  </div>
+  <div class="acb-person">
+    <div class="acb-person-name">
+      <span id="acb-name">—</span>
+      <span id="acb-status-badge" class="acb-status-badge acb-status-outside">⬤ FORA</span>
+    </div>
+    <div class="acb-person-meta" id="acb-meta">—</div>
+  </div>
+  <div class="acb-actions">
+    <button class="acb-btn-entrada" id="acb-btn-entrada" onclick="actionBalloonEntrada()">
+      🟢 Fazer Entrada Agora
+    </button>
+    <div class="acb-btn-row">
+      <button class="acb-btn-editar" onclick="actionBalloonEditar()">
+        ✏️ Editar Cadastro e Entrar
+      </button>
+      <button class="acb-btn-cancelar" onclick="closeActionBalloon()">Cancelar</button>
+    </div>
+  </div>
+  <div class="acb-hint" id="acb-hint">
+    Confirme a entrada ou edite o cadastro antes de liberar o acesso.
   </div>
 </div>
 
@@ -2366,7 +2526,7 @@ function globalSearch(val) {
     const isDentro = last && last.entrada && !last.saida;
 
     return `
-    <div class="hsd-item" data-idx="${i}">
+    <div class="hsd-item" data-idx="${i}" onclick="openActionBalloon('${r._id}',event)" style="cursor:pointer;">
       <div class="hsd-dot ${isDentro ? 'hsd-dot-in' : 'hsd-dot-out'}"></div>
       <div class="hsd-info">
         <div class="hsd-name">${r.nome} ${isDentro ? '<span style="color:var(--success);font-size:.7rem;">● DENTRO</span>' : ''}</div>
@@ -3063,6 +3223,30 @@ document.getElementById('modal-save-btn').onclick = async function() {
     await updateInFirestore(type, id, updates);
     closeModal();
     showToast('✅ Registro atualizado!');
+
+    // Se veio do balão de ação "Editar Cadastro e Entrar", registrar entrada agora
+    if (_editarParaEntrar && _editarParaEntrarId === id && type === 'cadastro') {
+      _editarParaEntrar   = false;
+      _editarParaEntrarId = null;
+      const rAtual = db.cadastro.find(x => x._id === id) || { ...updates, _id: id };
+      const nome = updates.nome || rAtual.nome || '';
+      setTimeout(async () => {
+        pedirConfirmacaoEntrada(id, async () => {
+          const entrada = new Date().toTimeString().slice(0,5);
+          try {
+            await addToFirestore('dados', {
+              data: todayStr(), nome, rg: updates.rg||'', cpf: updates.cpf||'',
+              cargo: updates.cargo||'', empresa: updates.empresa||'',
+              placa: '', placaTrailer: '', entrada, saida: '',
+            });
+            showToast(`🟢 Entrada de ${nome.split(' ')[0]} registrada: ${entrada}`);
+          } catch(err) { showToast('❌ Erro ao registrar entrada: ' + err.message, 'error'); }
+        });
+      }, 300);
+    } else {
+      _editarParaEntrar   = false;
+      _editarParaEntrarId = null;
+    }
   } catch(e) {
     showToast('❌ Erro ao atualizar: ' + e.message, 'error');
   } finally {
@@ -3232,6 +3416,21 @@ function cancelConfirmEntrada() {
   _pendingEntradaCallback   = null;
 }
 
+function cebEditarCadastro() {
+  // Guarda o id e o callback antes de fechar o balão
+  const id       = _pendingEntradaCadastroId;
+  const callback = _pendingEntradaCallback;
+  if (!id) return;
+
+  cancelConfirmEntrada(); // fecha o balão de confirmação
+
+  // Sinaliza que, após salvar a edição, deve pedir confirmação de entrada novamente
+  _editarParaEntrar   = true;
+  _editarParaEntrarId = id;
+
+  editRow('cadastro', id); // abre o modal de edição
+}
+
 document.addEventListener('keydown', function(e) {
   if (e.key === 'Escape') {
     cancelConfirmEntrada();
@@ -3282,6 +3481,124 @@ async function balloonRegistrarEntrada() {
     showToast('❌ Erro ao registrar entrada: ' + e.message, 'error');
   }
 }
+
+// ═══════════════════════════════════════════════════════════════
+// BALÃO DE AÇÃO — Pessoa Encontrada na Busca
+// ═══════════════════════════════════════════════════════════════
+let _acbCadastroId   = null;
+let _acbLastDadoId   = null;
+let _acbIsDentro     = false;
+
+function openActionBalloon(cadastroId, e) {
+  if (e) e.stopPropagation();
+
+  const r = db.cadastro.find(x => x._id === cadastroId);
+  if (!r) return;
+
+  // Fechar dropdown
+  const dd = document.getElementById('header-search-dropdown');
+  if (dd) { dd.classList.remove('open'); dd.innerHTML = ''; }
+
+  // Determinar status
+  const hoje = todayStr();
+  const accessToday = db.dados.filter(d =>
+    (d.nome||'').toUpperCase() === (r.nome||'').toUpperCase() && d.data === hoje
+  ).sort((a,b) => (b._createdAt?.seconds||0) - (a._createdAt?.seconds||0));
+  const last = accessToday[0];
+  const isDentro = !!(last && last.entrada && !last.saida);
+
+  _acbCadastroId = cadastroId;
+  _acbLastDadoId = last ? last._id : null;
+  _acbIsDentro   = isDentro;
+
+  // Preencher balão
+  document.getElementById('acb-name').textContent = r.nome;
+
+  const badge = document.getElementById('acb-status-badge');
+  if (isDentro) {
+    badge.textContent = '⬤ DENTRO';
+    badge.className = 'acb-status-badge acb-status-inside';
+  } else {
+    badge.textContent = '⬤ FORA';
+    badge.className = 'acb-status-badge acb-status-outside';
+  }
+
+  const metaParts = [
+    r.cpf ? 'CPF: ' + r.cpf : '',
+    r.rg  ? 'RG: '  + r.rg  : '',
+    r.cargo   || '',
+    r.empresa || '',
+  ].filter(Boolean);
+  document.getElementById('acb-meta').textContent = metaParts.join(' · ') || '—';
+
+  const btnEntrada = document.getElementById('acb-btn-entrada');
+  const hintEl     = document.getElementById('acb-hint');
+  if (isDentro) {
+    btnEntrada.disabled = true;
+    btnEntrada.textContent = '✅ Já está dentro';
+    hintEl.textContent = 'Esta pessoa já está com entrada registrada hoje. Você pode editar o cadastro se necessário.';
+  } else {
+    btnEntrada.disabled = false;
+    btnEntrada.innerHTML = '🟢 Fazer Entrada Agora';
+    hintEl.textContent = 'Confirme a entrada diretamente ou edite o cadastro antes de liberar o acesso.';
+  }
+
+  document.getElementById('action-balloon').classList.add('open');
+  document.getElementById('action-balloon-overlay').classList.add('open');
+}
+
+function closeActionBalloon() {
+  document.getElementById('action-balloon').classList.remove('open');
+  document.getElementById('action-balloon-overlay').classList.remove('open');
+  _acbCadastroId = null;
+  _acbLastDadoId = null;
+  _acbIsDentro   = false;
+}
+
+async function actionBalloonEntrada() {
+  if (!_acbCadastroId || _acbIsDentro) return;
+  closeActionBalloon();
+  // Limpar campo de busca
+  const headerInput = document.getElementById('header-search');
+  if (headerInput) headerInput.value = '';
+  clearTimeout(window._gsDebounce);
+  clearTimeout(window._nfbGlobalTimer);
+  pedirConfirmacaoEntrada(_acbCadastroId, async () => {
+    const r = db.cadastro.find(x => x._id === _acbCadastroId);
+    if (!r) return;
+    const entrada = new Date().toTimeString().slice(0,5);
+    try {
+      await addToFirestore('dados', {
+        data: todayStr(), nome: r.nome, rg: r.rg||'', cpf: r.cpf||'',
+        cargo: r.cargo||'', empresa: r.empresa||'',
+        placa: '', placaTrailer: '', entrada, saida: '',
+      });
+      showToast(`🟢 Entrada de ${r.nome.split(' ')[0]} registrada: ${entrada}`);
+    } catch(err) { showToast('❌ Erro: ' + err.message, 'error'); }
+  });
+}
+
+function actionBalloonEditar() {
+  if (!_acbCadastroId) return;
+  const id = _acbCadastroId;
+  closeActionBalloon();
+
+  // Limpar campo de busca
+  const headerInput = document.getElementById('header-search');
+  if (headerInput) headerInput.value = '';
+  clearTimeout(window._gsDebounce);
+  clearTimeout(window._nfbGlobalTimer);
+
+  // Abrir o modal de edição do cadastro
+  // Seta flag para registrar entrada automaticamente após salvar
+  _editarParaEntrar = true;
+  _editarParaEntrarId = id;
+  editRow('cadastro', id);
+}
+
+// Flag usada para registrar entrada após edição de cadastro
+let _editarParaEntrar    = false;
+let _editarParaEntrarId  = null;
 
 // ═══════════════════════════════════════════════════════════════
 // BALÃO "NÃO ENCONTRADO" — Sugerir Cadastro
@@ -3388,7 +3705,10 @@ function fecharCadastroInline() {
 
 // Fechar com ESC
 document.addEventListener('keydown', function(e) {
-  if (e.key === 'Escape') closeNotFoundBalloon();
+  if (e.key === 'Escape') {
+    closeNotFoundBalloon();
+    closeActionBalloon();
+  }
 });
 
 
