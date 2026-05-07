@@ -111,8 +111,16 @@
 
   /* ── Global Header Search ── */
   .header-search-wrap {
-    flex: 1; max-width: 420px;
+    flex: 1; max-width: 500px;
     position: relative;
+    display: flex;
+    align-items: center;
+    gap: .4rem;
+  }
+  .header-search-inner {
+    position: relative;
+    flex: 1;
+    min-width: 0;
   }
   .header-search-input {
     width: 100%;
@@ -135,6 +143,37 @@
     position: absolute; left: .8rem; top: 50%;
     transform: translateY(-50%); color: var(--muted);
     font-size: .9rem; pointer-events: none;
+  }
+  /* Toggle CPF / Nome */
+  .search-mode-toggle {
+    display: flex;
+    flex-shrink: 0;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+  }
+  .search-mode-btn {
+    font-family: 'DM Sans', sans-serif;
+    font-size: .74rem;
+    font-weight: 600;
+    letter-spacing: .04em;
+    padding: .42rem .7rem;
+    background: transparent;
+    border: none;
+    color: var(--muted);
+    cursor: pointer;
+    transition: background .15s, color .15s;
+    white-space: nowrap;
+    line-height: 1;
+  }
+  .search-mode-btn.active {
+    background: var(--accent);
+    color: #0d0f14;
+  }
+  .search-mode-btn:not(.active):hover {
+    color: var(--text);
+    background: var(--highlight);
   }
   .header-search-dropdown {
     position: absolute; top: calc(100% + 4px); left: 0; right: 0; z-index: 200;
@@ -532,6 +571,121 @@
   #toast.show { transform: translateX(0); }
   #toast.error { border-left-color: var(--danger); }
 
+  /* ── Form section label ── */
+  .form-card-section-label {
+    font-size: .7rem; font-weight: 700; letter-spacing: .12em;
+    text-transform: uppercase; color: var(--muted);
+    margin-bottom: .75rem; margin-top: .25rem;
+    display: flex; align-items: center; gap: .4rem;
+  }
+  .form-card-section-label::after {
+    content: ''; flex: 1; height: 1px; background: var(--border);
+  }
+
+  /* ── Balão de Revisão de Cadastro ── */
+  #review-balloon-overlay {
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,.65);
+    backdrop-filter: blur(4px);
+    z-index: 8900;
+    display: none;
+  }
+  #review-balloon-overlay.open { display: block; }
+  #review-balloon {
+    position: fixed;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%) scale(0.85);
+    z-index: 8901;
+    background: var(--card);
+    border: 1px solid var(--accent);
+    border-radius: 18px;
+    padding: 2rem 2.25rem 1.75rem;
+    min-width: 340px;
+    max-width: 460px;
+    width: 92vw;
+    box-shadow: 0 24px 64px rgba(0,0,0,.75), 0 0 0 1px rgba(245,166,35,.15);
+    display: none;
+    animation: reviewPop .3s cubic-bezier(.34,1.56,.64,1) forwards;
+    max-height: 90vh;
+    overflow-y: auto;
+  }
+  #review-balloon.open { display: block; }
+  @keyframes reviewPop {
+    from { opacity: 0; transform: translate(-50%, -50%) scale(0.8); }
+    to   { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+  }
+  .rvw-header {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 1.25rem;
+  }
+  .rvw-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.3rem; letter-spacing: .07em; color: var(--text);
+    display: flex; align-items: center; gap: .5rem;
+  }
+  .rvw-close {
+    background: none; border: none; color: var(--muted);
+    cursor: pointer; font-size: 1.1rem; line-height: 1;
+    transition: color .15s;
+  }
+  .rvw-close:hover { color: var(--danger); }
+  .rvw-section {
+    margin-bottom: 1rem;
+  }
+  .rvw-section-title {
+    font-size: .68rem; font-weight: 700; letter-spacing: .1em;
+    text-transform: uppercase; color: var(--accent);
+    margin-bottom: .5rem; padding-bottom: .35rem;
+    border-bottom: 1px solid rgba(245,166,35,.2);
+    display: flex; align-items: center; gap: .35rem;
+  }
+  .rvw-grid {
+    display: grid; grid-template-columns: 1fr 1fr; gap: .4rem .75rem;
+  }
+  .rvw-item { display: flex; flex-direction: column; gap: .1rem; }
+  .rvw-item.full { grid-column: 1 / -1; }
+  .rvw-label {
+    font-size: .65rem; font-weight: 600; letter-spacing: .08em;
+    text-transform: uppercase; color: var(--muted);
+  }
+  .rvw-value {
+    font-size: .88rem; color: var(--text); font-weight: 500;
+    font-family: 'DM Mono', monospace;
+  }
+  .rvw-value.empty { color: var(--muted); font-style: italic; font-family: 'DM Sans', sans-serif; }
+  .rvw-time-block {
+    background: rgba(61,186,124,.08);
+    border: 1px solid rgba(61,186,124,.2);
+    border-radius: 10px;
+    padding: .65rem 1rem;
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 1.25rem;
+  }
+  .rvw-time-label { font-size: .72rem; color: var(--muted); font-weight: 600; letter-spacing: .06em; text-transform: uppercase; }
+  .rvw-time-value { font-family: 'DM Mono', monospace; font-size: 1.3rem; color: var(--success); font-weight: 700; letter-spacing: .06em; }
+  .rvw-buttons { display: flex; gap: .75rem; margin-top: 1.5rem; }
+  .rvw-btn-confirm {
+    flex: 1; font-family: 'DM Sans', sans-serif;
+    font-size: .92rem; font-weight: 700;
+    padding: .75rem 1rem;
+    background: linear-gradient(135deg, #3dba7c, #27ae60);
+    color: #fff; border: none; border-radius: 10px;
+    cursor: pointer; transition: all .18s;
+    box-shadow: 0 3px 12px rgba(61,186,124,.4);
+    display: flex; align-items: center; justify-content: center; gap: .45rem;
+  }
+  .rvw-btn-confirm:hover { filter: brightness(1.1); transform: translateY(-1px); }
+  .rvw-btn-confirm:disabled { opacity: .5; cursor: not-allowed; transform: none; }
+  .rvw-btn-back {
+    font-family: 'DM Sans', sans-serif;
+    font-size: .88rem; font-weight: 600;
+    padding: .75rem 1.1rem;
+    background: transparent; border: 1px solid var(--border);
+    color: var(--muted); border-radius: 10px; cursor: pointer; transition: all .18s;
+    white-space: nowrap;
+  }
+  .rvw-btn-back:hover { border-color: var(--accent); color: var(--accent); }
+
   /* ── Empty state ── */
   .empty-state { text-align: center; padding: 4rem 2rem; color: var(--muted); }
   .empty-icon { font-size: 3rem; margin-bottom: 1rem; opacity: .4; }
@@ -842,7 +996,8 @@
   @media (max-width: 700px) {
     header { padding: 0 .75rem; }
     .logo-text { font-size: 1.1rem; }
-    .header-search-wrap { max-width: 160px; }
+    .header-search-wrap { max-width: 220px; }
+    .search-mode-btn { padding: .38rem .5rem; font-size: .68rem; }
     #live-clock { display: none; }
     main { padding: 0 .75rem 4rem; }
     .form-grid { grid-template-columns: 1fr; }
@@ -1179,17 +1334,24 @@
 
   <!-- BUSCA GLOBAL HEADER -->
   <div class="header-search-wrap">
-    <span class="header-search-icon">🔍</span>
-    <input
-      type="text"
-      class="header-search-input"
-      id="header-search"
-      placeholder="Buscar por nome, RG ou CPF..."
-      autocomplete="off"
-      oninput="clearTimeout(window._gsDebounce); window._gsDebounce = setTimeout(() => globalSearch(this.value), 350)"
-      onkeydown="globalSearchKeyNav(event)"
-    >
-    <div class="header-search-dropdown" id="header-search-dropdown"></div>
+    <div class="search-mode-toggle">
+      <button class="search-mode-btn active" id="smb-cpf" onclick="setSearchMode('cpf')">🪪 CPF</button>
+      <button class="search-mode-btn" id="smb-nome" onclick="setSearchMode('nome')">👤 Nome</button>
+    </div>
+    <div class="header-search-inner">
+      <span class="header-search-icon" id="header-search-icon">🪪</span>
+      <input
+        type="text"
+        class="header-search-input"
+        id="header-search"
+        placeholder="Digite o CPF (ex: 000.000.000-00)..."
+        autocomplete="off"
+        inputmode="numeric"
+        oninput="globalSearchDebounced(this.value)"
+        onkeydown="globalSearchKeyNav(event)"
+      >
+      <div class="header-search-dropdown" id="header-search-dropdown"></div>
+    </div>
   </div>
 
   <div class="header-right">
@@ -1226,9 +1388,12 @@
     <div id="inline-cadastro-panel" style="display:none;">
       <div class="form-card" style="border-color:rgba(245,166,35,.45);margin-bottom:1.5rem;">
         <div class="form-card-title" style="display:flex;align-items:center;justify-content:space-between;">
-          <span>✏️ Novo Cadastro</span>
+          <span>✏️ Novo Cadastro + Entrada</span>
           <button onclick="fecharCadastroInline()" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:1.1rem;line-height:1;" title="Fechar">✕</button>
         </div>
+
+        <!-- Seção: Dados Pessoais -->
+        <div class="form-card-section-label">👤 Dados Pessoais</div>
         <div class="form-grid">
           <div class="form-group half">
             <label>Nome Completo <span class="req">*</span></label>
@@ -1264,91 +1429,58 @@
             </select>
           </div>
         </div>
+
+        <!-- Seção: Veículo -->
+        <div class="form-card-section-label" style="margin-top:1.25rem;">🚛 Veículo <span style="font-weight:400;font-size:.72rem;color:var(--muted);text-transform:none;letter-spacing:0;">(opcional)</span></div>
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Tipo de Veículo</label>
+            <select id="c-tipo-veiculo" onchange="toggleTrailerField()">
+              <option value="">Sem veículo</option>
+              <option value="CARRO">🚗 Carro / Moto</option>
+              <option value="VAN">🚐 Van / Utilitário</option>
+              <option value="CAMINHAO">🚛 Caminhão</option>
+              <option value="CARRETA">🚚 Carreta / Bitrem</option>
+              <option value="OUTRO">🔧 Outro</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Placa do Veículo</label>
+            <input type="text" id="c-placa" placeholder="Ex: ABC-1234" maxlength="10" oninput="this.value=this.value.toUpperCase()">
+          </div>
+          <div class="form-group" id="c-trailer-wrap" style="display:none;">
+            <label>Placa do Reboque / Trailer</label>
+            <input type="text" id="c-placa-trailer" placeholder="Ex: XYZ-5678" maxlength="10" oninput="this.value=this.value.toUpperCase()">
+          </div>
+        </div>
+
         <div class="btn-row">
-          <button class="btn btn-primary" id="btn-save-cadastro" onclick="addCadastro()">💾 Salvar Cadastro</button>
+          <button class="btn btn-primary" id="btn-save-cadastro" onclick="revisarCadastro()" style="background:linear-gradient(135deg,var(--accent),var(--accent2));gap:.5rem;">
+            🔍 Revisar e Liberar Entrada
+          </button>
           <button class="btn btn-outline" onclick="fecharCadastroInline()">✕ Cancelar</button>
         </div>
       </div>
     </div>
 
     <!-- PAINEL DE BUSCA RÁPIDA -->
-    <div class="quick-search-panel">
-      <div class="qs-title">⚡ Busca Rápida por Cadastro</div>
-      <div class="qs-row">
-        <div class="qs-type-btns">
-          <button class="qs-type-btn active" onclick="setQsType('nome',this)">Nome</button>
-          <button class="qs-type-btn" onclick="setQsType('rg',this)">RG</button>
-          <button class="qs-type-btn" onclick="setQsType('cpf',this)">CPF</button>
-        </div>
-        <div class="qs-input-wrap">
-          <span class="qs-input-icon">🔍</span>
-          <input type="text" id="qs-input" placeholder="Digite para buscar no cadastro..."
-            oninput="clearTimeout(window._qsDebounce); window._qsDebounce = setTimeout(qsSearch, 350)" onkeydown="if(event.key==='Enter') { clearTimeout(window._qsDebounce); qsSearch(); }" autocomplete="off">
-        </div>
-        <button class="qs-btn" onclick="qsSearch()">🔎 Buscar</button>
-      </div>
-      <div class="qs-results" id="qs-results"></div>
-    </div>
 
-    <div class="form-card">
-      <div class="form-card-title">🚗 Registrar Novo Acesso</div>
-      <div class="form-grid">
-        <div class="form-group">
-          <label>Data <span class="req">*</span></label>
-          <input type="date" id="d-data">
-        </div>
-        <div class="form-group">
-          <label>Placa do Veículo</label>
-          <input type="text" id="d-placa" placeholder="Ex: ABC-1234" maxlength="10" oninput="this.value=this.value.toUpperCase()">
-        </div>
-        <div class="form-group">
-          <label>Placa do Trailer <span style="font-size:.65rem;color:var(--muted);font-weight:400;text-transform:none;">(quando aplicável)</span></label>
-          <div class="trailer-wrap">
-            <input type="text" id="d-placa-trailer" placeholder="Ex: XYZ-5678" maxlength="10" oninput="this.value=this.value.toUpperCase()">
-            <span class="trailer-label-tag">Trailer</span>
-          </div>
-        </div>
-        <div class="form-group half" style="position:relative;">
-          <label>Nome Completo <span class="req">*</span></label>
-          <div class="autocomplete-wrap">
-            <input type="text" id="d-nome" placeholder="Digite ou busque pelo cadastro..." autocomplete="off"
-              oninput="clearTimeout(window._acDebounce); window._acDebounce = setTimeout(() => acSearch(this.value), 350)" onkeydown="acKeyNav(event)" onfocus="acSearch(this.value)">
-            <div class="autocomplete-list" id="ac-list"></div>
-          </div>
-        </div>
-        <div class="form-group">
-          <label>RG</label>
-          <input type="text" id="d-rg" placeholder="00.000.000-0">
-        </div>
-        <div class="form-group">
-          <label>CPF</label>
-          <input type="text" id="d-cpf" placeholder="000.000.000-00">
-        </div>
-        <div class="form-group">
-          <label>Cargo / Função</label>
-          <select id="d-cargo">
-            <option value="">Selecione o cargo...</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label>Empresa</label>
-          <select id="d-empresa">
-            <option value="">Selecione a empresa...</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label>Horário de Entrada</label>
-          <input type="time" id="d-entrada">
-        </div>
-        <div class="form-group">
-          <label>Horário de Saída</label>
-          <input type="time" id="d-saida">
-        </div>
-      </div>
-      <div class="btn-row">
-        <button class="btn btn-primary" id="btn-save-dados" onclick="addDado()">✅ Registrar Acesso</button>
-        <button class="btn btn-outline" onclick="clearForm('d')">✕ Limpar</button>
-      </div>
+    <div id="qs-results" style="display:none;"></div>
+    <input type="hidden" id="qs-input" value="">
+
+<!-- Campos ocultos mantidos para compatibilidade interna (addDado, clearForm, edição de registros) -->
+    <div style="display:none;">
+      <input type="date" id="d-data">
+      <input type="text" id="d-placa">
+      <input type="text" id="d-placa-trailer">
+      <input type="text" id="d-nome">
+      <div class="autocomplete-list" id="ac-list"></div>
+      <input type="text" id="d-rg">
+      <input type="text" id="d-cpf">
+      <select id="d-cargo"></select>
+      <select id="d-empresa"></select>
+      <input type="time" id="d-entrada">
+      <input type="time" id="d-saida">
     </div>
 
     <div class="filter-bar">
@@ -1695,22 +1827,67 @@
   </div>
 </div>
 
+<!-- ══ BALÃO DE REVISÃO DE CADASTRO + ENTRADA ══ -->
+<div id="review-balloon-overlay" onclick="fecharReviewBalloon()"></div>
+<div id="review-balloon">
+  <div class="rvw-header">
+    <div class="rvw-title">🔍 Confirmar Dados</div>
+    <button class="rvw-close" onclick="fecharReviewBalloon()">✕</button>
+  </div>
+
+  <!-- Hora de entrada ao vivo -->
+  <div class="rvw-time-block">
+    <div class="rvw-time-label">⏱ Hora de Entrada</div>
+    <div class="rvw-time-value" id="rvw-hora">--:--:--</div>
+  </div>
+
+  <!-- Dados pessoais -->
+  <div class="rvw-section">
+    <div class="rvw-section-title">👤 Dados Pessoais</div>
+    <div class="rvw-grid">
+      <div class="rvw-item full"><div class="rvw-label">Nome</div><div class="rvw-value" id="rvw-nome"></div></div>
+      <div class="rvw-item"><div class="rvw-label">CPF</div><div class="rvw-value" id="rvw-cpf"></div></div>
+      <div class="rvw-item"><div class="rvw-label">RG</div><div class="rvw-value" id="rvw-rg"></div></div>
+      <div class="rvw-item"><div class="rvw-label">Cargo / Função</div><div class="rvw-value" id="rvw-cargo"></div></div>
+      <div class="rvw-item"><div class="rvw-label">Empresa</div><div class="rvw-value" id="rvw-empresa"></div></div>
+      <div class="rvw-item full"><div class="rvw-label">Motivo de Entrada</div><div class="rvw-value" id="rvw-motivo"></div></div>
+    </div>
+  </div>
+
+  <!-- Dados do veículo -->
+  <div class="rvw-section" id="rvw-veiculo-section">
+    <div class="rvw-section-title">🚛 Veículo</div>
+    <div class="rvw-grid">
+      <div class="rvw-item"><div class="rvw-label">Tipo</div><div class="rvw-value" id="rvw-tipo-veiculo"></div></div>
+      <div class="rvw-item"><div class="rvw-label">Placa</div><div class="rvw-value" id="rvw-placa"></div></div>
+      <div class="rvw-item" id="rvw-trailer-item"><div class="rvw-label">Reboque / Trailer</div><div class="rvw-value" id="rvw-placa-trailer"></div></div>
+    </div>
+  </div>
+
+  <div class="rvw-buttons">
+    <button class="rvw-btn-back" onclick="fecharReviewBalloon()">← Corrigir</button>
+    <button class="rvw-btn-confirm" id="rvw-btn-confirmar" onclick="confirmarCadastroEEntrada()">
+      ✅ Confirmar e Liberar Entrada
+    </button>
+  </div>
+</div>
+
 <!-- ══ BALÃO "NÃO ENCONTRADO" — Sugerir Cadastro ══ -->
 <div id="not-found-balloon-overlay" onclick="closeNotFoundBalloon()"></div>
 <div id="not-found-balloon">
-  <div class="nfb-icon">🔍</div>
-  <div class="nfb-title">Nenhum Cadastro Encontrado</div>
+  <div class="nfb-icon" id="nfb-icon">🔍</div>
+  <div class="nfb-title" id="nfb-title">Não encontrado</div>
   <div class="nfb-query" id="nfb-query-text"></div>
-  <div class="nfb-sub">
-    Deseja cadastrar esta pessoa agora?<br>
-    <span style="font-size:.76rem;opacity:.7;">Após o cadastro, você poderá registrar a entrada.</span>
+  <div class="nfb-sub" id="nfb-sub">
+    Não foi encontrado nenhum cadastro.<br>
+    <span style="font-size:.76rem;opacity:.7;">Clique em <strong style="color:var(--accent);">Cadastrar</strong> para preencher os dados e liberar o acesso.</span>
   </div>
   <div class="nfb-buttons">
     <button class="nfb-btn-confirm" onclick="notFoundIrParaCadastro()">
-      ✏️ Sim, fazer cadastro
+      ✏️ Cadastrar agora
     </button>
     <button class="nfb-btn-cancel" onclick="closeNotFoundBalloon()">
-      Não agora
+      Cancelar
     </button>
   </div>
 </div>
@@ -2173,6 +2350,61 @@ function refreshAllDropdowns() {
 // ═══════════════════════════════════════════════════════════════
 let globalHighlight = -1;
 
+// Modo de busca: 'cpf' (padrão) ou 'nome'
+let searchMode = 'cpf';
+
+function setSearchMode(mode) {
+  searchMode = mode;
+  const input = document.getElementById('header-search');
+  const icon  = document.getElementById('header-search-icon');
+  const btnCpf  = document.getElementById('smb-cpf');
+  const btnNome = document.getElementById('smb-nome');
+
+  if (mode === 'cpf') {
+    input.placeholder = 'Digite o CPF (ex: 000.000.000-00)...';
+    input.inputMode = 'numeric';
+    icon.textContent = '🪪';
+    btnCpf.classList.add('active');
+    btnNome.classList.remove('active');
+  } else {
+    input.placeholder = 'Digite o nome para buscar...';
+    input.inputMode = 'text';
+    icon.textContent = '👤';
+    btnNome.classList.add('active');
+    btnCpf.classList.remove('active');
+  }
+
+  // Limpar campo e dropdown ao trocar de modo
+  input.value = '';
+  const dd = document.getElementById('header-search-dropdown');
+  dd.classList.remove('open'); dd.innerHTML = '';
+  clearTimeout(window._gsDebounce);
+  clearTimeout(window._nfbGlobalTimer);
+  input.focus();
+}
+
+// Debounce inteligente: CPF completo (11 dígitos) busca imediatamente;
+// CPF incompleto aguarda 2s para o porteiro terminar de digitar;
+// nome aguarda 400ms.
+function globalSearchDebounced(val) {
+  clearTimeout(window._gsDebounce);
+  clearTimeout(window._nfbGlobalTimer);
+
+  if (searchMode === 'cpf') {
+    const qClean = val.replace(/\D/g, '');
+    const isCpfComplete = qClean.length >= 11;
+    const isCpfPartial  = qClean.length >= 3 && qClean.length < 11;
+    const isNumeric     = /^\d[\d.\-\/\s]*$/.test(val.trim());
+
+    if (isCpfComplete) { globalSearch(val); return; }
+    const delay = (isNumeric && isCpfPartial) ? 2000 : 600;
+    window._gsDebounce = setTimeout(() => globalSearch(val), delay);
+  } else {
+    // Modo nome: debounce de 400ms
+    window._gsDebounce = setTimeout(() => globalSearch(val), 400);
+  }
+}
+
 function globalSearch(val) {
   const dd = document.getElementById('header-search-dropdown');
   const q = val.trim().toLowerCase();
@@ -2181,23 +2413,37 @@ function globalSearch(val) {
     dd.classList.remove('open'); dd.innerHTML = ''; return;
   }
 
-  const results = db.cadastro.filter(r =>
-    (r.nome||'').toLowerCase().includes(q) ||
-    (r.rg||'').toLowerCase().includes(q) ||
-    (r.cpf||'').toLowerCase().replace(/\D/g,'').includes(q.replace(/\D/g,''))
-  ).slice(0, 10);
+  const qClean = q.replace(/\D/g, '');
+  // detectedType: no modo nome sempre 'nome'; no modo cpf usa input
+  const isNumericInput = qClean.length > 0 && /^[\d.\-\s\/]+$/.test(val.trim());
+  const detectedType = searchMode === 'nome' ? 'nome' : (isNumericInput ? 'cpf' : 'nome');
+
+  // Filtro por modo
+  const results = db.cadastro.filter(r => {
+    if (searchMode === 'nome') {
+      return (r.nome||'').toLowerCase().includes(q);
+    }
+    // modo CPF: busca também por nome e RG para não quebrar fluxo existente
+    return (r.nome||'').toLowerCase().includes(q) ||
+           (r.rg||'').toLowerCase().includes(q) ||
+           (r.cpf||'').toLowerCase().replace(/\D/g,'').includes(qClean);
+  }).slice(0, 10);
 
   globalHighlight = -1;
 
   if (!results.length) {
+    // Mostra "não encontrado" no dropdown
     dd.innerHTML = `<div class="hsd-no-results">🔍 Nenhum cadastro encontrado para "<strong>${val}</strong>"</div>`;
     dd.classList.add('open');
     clearTimeout(window._nfbGlobalTimer);
+
+    // CPF completo: abre balão imediatamente; CPF parcial: 1,5s; nome: 1,5s
+    const tempoParaBalaoCadastro = (searchMode === 'cpf' && qClean.length >= 11) ? 800 : 1500;
     window._nfbGlobalTimer = setTimeout(() => {
       dd.classList.remove('open');
       document.getElementById('header-search-dropdown').innerHTML = '';
-      showNotFoundBalloon(val.trim(), 'nome');
-    }, 600);
+      showNotFoundBalloon(val.trim(), detectedType);
+    }, tempoParaBalaoCadastro);
     return;
   }
 
@@ -2242,7 +2488,13 @@ async function globalRegEntrada(cadastroId, e) {
         placa: '', placaTrailer: '', entrada, saida: '',
       });
       showToast(`🟢 Entrada de ${r.nome.split(' ')[0]} registrada: ${entrada}`);
-      setTimeout(() => globalSearch(document.getElementById('header-search').value), 500);
+      // Limpar campo de busca e fechar dropdown
+      const headerInput = document.getElementById('header-search');
+      const dd = document.getElementById('header-search-dropdown');
+      if (headerInput) headerInput.value = '';
+      if (dd) { dd.classList.remove('open'); dd.innerHTML = ''; }
+      clearTimeout(window._gsDebounce);
+      clearTimeout(window._nfbGlobalTimer);
     } catch(err) { showToast('❌ Erro: ' + err.message, 'error'); }
   });
 }
@@ -2427,39 +2679,133 @@ async function confirmSaidaTodos() {
 // ═══════════════════════════════════════════════════════════════
 let lastCadastroSaved = null;
 
-async function addCadastro() {
-  const nome = document.getElementById('c-nome').value.trim().toUpperCase();
+// Mostra/oculta campo de trailer conforme tipo de veículo
+function toggleTrailerField() {
+  const tipo = document.getElementById('c-tipo-veiculo').value;
+  const wrap = document.getElementById('c-trailer-wrap');
+  wrap.style.display = (tipo === 'CARRETA' || tipo === 'CAMINHAO') ? 'flex' : 'none';
+}
+
+// Abre balão de revisão com todos os dados preenchidos
+let _rvwClockInterval = null;
+
+function revisarCadastro() {
+  const nome   = document.getElementById('c-nome').value.trim().toUpperCase();
   const motivo = document.getElementById('c-motivo').value;
   if (!nome)   { showToast('Preencha o Nome Completo', 'error'); return; }
   if (!motivo) { showToast('Selecione o Motivo de Entrada', 'error'); return; }
 
-  const btn = document.getElementById('btn-save-cadastro');
+  const rg          = document.getElementById('c-rg').value.trim();
+  const cpf         = document.getElementById('c-cpf').value.trim();
+  const cargo       = document.getElementById('c-cargo').value.trim().toUpperCase();
+  const empresa     = document.getElementById('c-empresa').value.trim().toUpperCase();
+  const tipoVeiculo = document.getElementById('c-tipo-veiculo').value;
+  const placa       = document.getElementById('c-placa').value.trim().toUpperCase();
+  const placaTrailer= document.getElementById('c-placa-trailer').value.trim().toUpperCase();
+
+  const tipoLabel = { CARRO:'🚗 Carro / Moto', VAN:'🚐 Van / Utilitário', CAMINHAO:'🚛 Caminhão', CARRETA:'🚚 Carreta / Bitrem', OUTRO:'🔧 Outro' }[tipoVeiculo] || '';
+
+  // Preencher campos do balão
+  const set = (id, val, fallback) => {
+    const el = document.getElementById(id);
+    if (!val) { el.textContent = fallback || '—'; el.className = 'rvw-value empty'; }
+    else { el.textContent = val; el.className = 'rvw-value'; }
+  };
+  set('rvw-nome', nome);
+  set('rvw-cpf', cpf);
+  set('rvw-rg', rg);
+  set('rvw-cargo', cargo);
+  set('rvw-empresa', empresa);
+  set('rvw-motivo', motivo);
+
+  // Seção veículo
+  const veiculoSection = document.getElementById('rvw-veiculo-section');
+  if (tipoVeiculo) {
+    veiculoSection.style.display = 'block';
+    set('rvw-tipo-veiculo', tipoLabel);
+    set('rvw-placa', placa);
+    const trailerItem = document.getElementById('rvw-trailer-item');
+    if (tipoVeiculo === 'CARRETA' || tipoVeiculo === 'CAMINHAO') {
+      trailerItem.style.display = 'flex';
+      set('rvw-placa-trailer', placaTrailer);
+    } else {
+      trailerItem.style.display = 'none';
+    }
+  } else {
+    veiculoSection.style.display = 'none';
+  }
+
+  // Relógio ao vivo
+  function atualizarHora() {
+    document.getElementById('rvw-hora').textContent =
+      new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+  }
+  atualizarHora();
+  clearInterval(_rvwClockInterval);
+  _rvwClockInterval = setInterval(atualizarHora, 1000);
+
+  // Abrir balão
+  document.getElementById('review-balloon').classList.add('open');
+  document.getElementById('review-balloon-overlay').classList.add('open');
+}
+
+function fecharReviewBalloon() {
+  clearInterval(_rvwClockInterval);
+  document.getElementById('review-balloon').classList.remove('open');
+  document.getElementById('review-balloon-overlay').classList.remove('open');
+}
+
+async function confirmarCadastroEEntrada() {
+  const btn = document.getElementById('rvw-btn-confirmar');
   btn.disabled = true; btn.textContent = '⏳ Salvando...';
 
+  const nome        = document.getElementById('c-nome').value.trim().toUpperCase();
+  const motivo      = document.getElementById('c-motivo').value;
+  const rg          = document.getElementById('c-rg').value.trim();
+  const cpf         = document.getElementById('c-cpf').value.trim();
+  const cargo       = document.getElementById('c-cargo').value.trim().toUpperCase();
+  const empresa     = document.getElementById('c-empresa').value.trim().toUpperCase();
+  const tipoVeiculo = document.getElementById('c-tipo-veiculo').value;
+  const placa       = document.getElementById('c-placa').value.trim().toUpperCase();
+  const placaTrailer= document.getElementById('c-placa-trailer').value.trim().toUpperCase();
+  const entrada     = new Date().toTimeString().slice(0,5);
+
   try {
-    const newId = await addToFirestore('cadastro', {
-      nome, motivo,
-      rg:      document.getElementById('c-rg').value.trim(),
-      cpf:     document.getElementById('c-cpf').value.trim(),
-      cargo:   document.getElementById('c-cargo').value.trim().toUpperCase(),
-      empresa: document.getElementById('c-empresa').value.trim().toUpperCase(),
+    // 1. Salvar cadastro
+    const newId = await addToFirestore('cadastro', { nome, motivo, rg, cpf, cargo, empresa });
+
+    // 2. Registrar entrada imediatamente
+    await addToFirestore('dados', {
+      data: todayStr(), nome, rg, cpf, cargo, empresa,
+      placa: placa || '',
+      placaTrailer: placaTrailer || '',
+      entrada, saida: '',
     });
-    lastCadastroSaved = {
-      _id: newId, nome, motivo,
-      rg:      document.getElementById('c-rg').value.trim(),
-      cpf:     document.getElementById('c-cpf').value.trim(),
-      cargo:   document.getElementById('c-cargo').value.trim().toUpperCase(),
-      empresa: document.getElementById('c-empresa').value.trim().toUpperCase(),
-    };
-    clearForm('c');
+
+    fecharReviewBalloon();
     fecharCadastroInline();
-    showToast('✅ Cadastro registrado com sucesso!');
-    showEntradaBalloon(lastCadastroSaved);
+    clearForm('c');
+
+    showToast('🟢 Cadastro realizado e entrada liberada: ' + entrada);
+
+    // Limpar busca do header
+    const headerInput = document.getElementById('header-search');
+    const dd = document.getElementById('header-search-dropdown');
+    if (headerInput) headerInput.value = '';
+    if (dd) { dd.classList.remove('open'); dd.innerHTML = ''; }
+    clearTimeout(window._gsDebounce);
+    clearTimeout(window._nfbGlobalTimer);
+
   } catch(e) {
     showToast('❌ Erro ao salvar: ' + e.message, 'error');
   } finally {
-    btn.disabled = false; btn.textContent = '💾 Salvar Cadastro';
+    btn.disabled = false; btn.textContent = '✅ Confirmar e Liberar Entrada';
   }
+}
+
+async function addCadastro() {
+  // Mantido para compatibilidade, redireciona para o novo fluxo
+  revisarCadastro();
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -2502,10 +2848,13 @@ async function addDado() {
 // ═══════════════════════════════════════════════════════════════
 function clearForm(prefix) {
   if (prefix === 'c') {
-    ['c-nome','c-rg','c-cpf'].forEach(id => document.getElementById(id).value = '');
+    ['c-nome','c-rg','c-cpf','c-placa','c-placa-trailer'].forEach(id => { const el = document.getElementById(id); if(el) el.value = ''; });
     document.getElementById('c-cargo').value = '';
     document.getElementById('c-empresa').value = '';
     document.getElementById('c-motivo').value = '';
+    document.getElementById('c-tipo-veiculo').value = '';
+    const trailerWrap = document.getElementById('c-trailer-wrap');
+    if (trailerWrap) trailerWrap.style.display = 'none';
   } else {
     ['d-placa','d-placa-trailer','d-nome','d-rg','d-cpf','d-entrada','d-saida'].forEach(id => document.getElementById(id).value = '');
     document.getElementById('d-cargo').value = '';
@@ -2836,10 +3185,15 @@ function acSearch(val) {
   const q = val.trim().toLowerCase();
   if (!q || q.length < 2) { acClose(); return; }
 
+  const qClean = q.replace(/\D/g, '');
+  const detectedType = qClean.length >= 10 ? 'cpf'
+                     : qClean.length >= 7  ? 'rg'
+                     : 'nome';
+
   const results = db.cadastro.filter(r =>
     (r.nome||'').toLowerCase().includes(q) ||
     (r.rg||'').toLowerCase().includes(q) ||
-    (r.cpf||'').toLowerCase().includes(q)
+    (r.cpf||'').toLowerCase().replace(/\D/g,'').includes(qClean)
   ).slice(0, 8);
 
   if (!results.length) {
@@ -2848,10 +3202,8 @@ function acSearch(val) {
     clearTimeout(window._nfbAcTimer);
     window._nfbAcTimer = setTimeout(() => {
       acClose();
-      const isNumeric = /^\d[\d.\-\/]+$/.test(val.trim());
-      const type = isNumeric ? (val.trim().replace(/\D/g,'').length > 9 ? 'cpf' : 'rg') : 'nome';
-      showNotFoundBalloon(val.trim(), type);
-    }, 600);
+      showNotFoundBalloon(val.trim(), detectedType);
+    }, detectedType === 'nome' ? 7000 : 600);
     return;
   }
 
@@ -3073,7 +3425,10 @@ function cancelConfirmEntrada() {
 }
 
 document.addEventListener('keydown', function(e) {
-  if (e.key === 'Escape') cancelConfirmEntrada();
+  if (e.key === 'Escape') {
+    cancelConfirmEntrada();
+    fecharReviewBalloon();
+  }
 });
 
 // ═══════════════════════════════════════════════════════════════
@@ -3134,6 +3489,22 @@ function showNotFoundBalloon(queryText, searchType) {
   const overlay  = document.getElementById('not-found-balloon-overlay');
   const queryEl  = document.getElementById('nfb-query-text');
 
+  // Adaptar ícone, título e subtítulo conforme o tipo de busca
+  const isCpf = _nfbPrefillType === 'cpf';
+  const iconEl  = document.getElementById('nfb-icon');
+  const titleEl = document.getElementById('nfb-title');
+  const subEl   = document.getElementById('nfb-sub');
+
+  if (isCpf) {
+    iconEl.textContent  = '🪪';
+    titleEl.textContent = 'CPF não cadastrado';
+    subEl.innerHTML     = 'Este CPF não foi encontrado no sistema.<br><span style="font-size:.76rem;opacity:.7;">Clique em <strong style="color:var(--accent);">Cadastrar</strong> para preencher os dados e liberar o acesso.</span>';
+  } else {
+    iconEl.textContent  = '👤';
+    titleEl.textContent = 'Nome não encontrado';
+    subEl.innerHTML     = 'Nenhum cadastro com este nome.<br><span style="font-size:.76rem;opacity:.7;">Clique em <strong style="color:var(--accent);">Cadastrar</strong> para preencher os dados e liberar o acesso.</span>';
+  }
+
   const label = { nome: 'Nome', rg: 'RG', cpf: 'CPF' }[_nfbPrefillType] || '';
   queryEl.textContent = label ? `${label}: "${queryText}"` : `"${queryText}"`;
 
@@ -3156,6 +3527,10 @@ function notFoundIrParaCadastro() {
   if (qsWrap) { qsWrap.classList.remove('open'); qsWrap.innerHTML = ''; }
   acClose();
 
+  // Limpar o campo de busca do header
+  const headerInput = document.getElementById('header-search');
+  if (headerInput) headerInput.value = '';
+
   // Garantir que a aba Registro de Acessos esteja ativa
   const dadosBtn = document.querySelector('.tab-btn[onclick*="dados"]');
   if (dadosBtn && !dadosBtn.classList.contains('active')) dadosBtn.click();
@@ -3163,10 +3538,10 @@ function notFoundIrParaCadastro() {
   // Abrir painel de cadastro inline
   abrirCadastroInline();
 
-  // Preencher o campo correto com o valor pesquisado
+  // Preencher o campo correto com o valor pesquisado e focar
   setTimeout(() => {
     const map = { nome: 'c-nome', rg: 'c-rg', cpf: 'c-cpf' };
-    const fieldId = map[_nfbPrefillType] || 'c-nome';
+    const fieldId = map[_nfbPrefillType] || 'c-cpf';
     const field = document.getElementById(fieldId);
     if (field) {
       field.value = _nfbPrefillType === 'nome'
@@ -3174,8 +3549,19 @@ function notFoundIrParaCadastro() {
         : _nfbPrefillValue;
       field.focus();
       field.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      // Destacar visualmente o campo preenchido automaticamente
+      field.style.borderColor = 'var(--accent)';
+      field.style.boxShadow = '0 0 0 3px rgba(245,166,35,.25)';
+      setTimeout(() => { field.style.borderColor = ''; field.style.boxShadow = ''; }, 2500);
     }
-  }, 180);
+    // Se o tipo for CPF, focar no próximo campo vazio (nome) após preencher CPF
+    if (_nfbPrefillType === 'cpf') {
+      const nomeField = document.getElementById('c-nome');
+      if (nomeField && !nomeField.value) {
+        setTimeout(() => { nomeField.focus(); nomeField.scrollIntoView({ behavior: 'smooth', block: 'center' }); }, 400);
+      }
+    }
+  }, 200);
 }
 
 function abrirCadastroInline() {
