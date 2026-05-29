@@ -1589,6 +1589,18 @@
               <button type="button" class="sel-mgr-btn del" title="Excluir motivo selecionado" onclick="cfgMiniExcluir('motivo','c-motivo')">&#128465;</button>
             </div>
           </div>
+          <div class="form-group half">
+            <label>👤 Responsável pela Liberação <span class="req">*</span></label>
+            <div class="select-manage-wrap">
+              <select id="c-responsavel-sel" style="border-color:rgba(245,166,35,.5);">
+                <option value="">Selecione o responsável...</option>
+              </select>
+              <button type="button" class="sel-mgr-btn add" title="Adicionar novo responsável" onclick="cfgMiniAbrir('responsavel','add')">+</button>
+              <button type="button" class="sel-mgr-btn" title="Editar responsável selecionado" onclick="cfgMiniAbrir('responsavel','edit','c-responsavel-sel')">&#9999;</button>
+              <button type="button" class="sel-mgr-btn del" title="Excluir responsável selecionado" onclick="cfgMiniExcluir('responsavel','c-responsavel-sel')">&#128465;</button>
+            </div>
+            <div style="font-size:.68rem;color:var(--muted);margin-top:.3rem;">Pessoa interna que está autorizando esta entrada</div>
+          </div>
         </div>
 
         <!-- Seção: Veículo -->
@@ -1670,6 +1682,7 @@
             <th onclick="sortTable('dados',8)">Entrada <span class="sort-icon">↕</span></th>
             <th onclick="sortTable('dados',9)">Saída <span class="sort-icon">↕</span></th>
             <th>Status</th>
+            <th>Responsável</th>
             <th>Ações</th>
           </tr>
         </thead>
@@ -1797,6 +1810,28 @@
         <div style="padding:.75rem 1.25rem;background:rgba(245,166,35,.06);border-top:1px solid var(--border);">
           <div style="font-size:.72rem;color:var(--muted);line-height:1.5;">
             💡 Os <strong style="color:var(--accent);">Motivos de Entrada</strong> aparecem no campo obrigatório do formulário de cadastro. Se nenhum for cadastrado, os motivos padrão são usados.
+          </div>
+        </div>
+      </div>
+
+      <!-- RESPONSÁVEIS PELA LIBERAÇÃO -->
+      <div class="config-block" style="border-color:rgba(245,166,35,.35);">
+        <div class="config-block-header" style="background:rgba(245,166,35,.07);">
+          <div class="config-block-title" style="color:var(--accent);">👤 Responsáveis pela Liberação</div>
+          <span class="config-block-count" id="cnt-responsaveis">0</span>
+        </div>
+        <div class="config-add-row">
+          <input type="text" id="new-responsavel" placeholder="Nome do responsável..." maxlength="80"
+            onkeydown="if(event.key==='Enter') addConfigItem('responsavel')"
+            oninput="this.value=this.value.toUpperCase()">
+          <button class="config-add-btn" onclick="addConfigItem('responsavel')">+ Adicionar</button>
+        </div>
+        <div class="config-list" id="list-responsavel">
+          <div class="config-empty">Nenhum responsável cadastrado.</div>
+        </div>
+        <div style="padding:.75rem 1.25rem;background:rgba(245,166,35,.06);border-top:1px solid var(--border);">
+          <div style="font-size:.72rem;color:var(--muted);line-height:1.5;">
+            💡 Os <strong style="color:var(--accent);">Responsáveis pela Liberação</strong> são as pessoas internas autorizadas a liberar acessos. Este campo é <strong style="color:var(--danger);">obrigatório</strong> em toda entrada registrada.
           </div>
         </div>
       </div>
@@ -1988,6 +2023,14 @@
   <div class="ceb-name" id="ceb-nome"></div>
   <div class="ceb-meta" id="ceb-meta"></div>
   <div class="ceb-time" id="ceb-time"></div>
+  <div style="margin-bottom:1.1rem;text-align:left;">
+    <label style="font-size:.72rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--accent);display:block;margin-bottom:.4rem;">👤 Responsável pela Liberação <span style="color:var(--danger);">*</span></label>
+    <select id="ceb-responsavel-sel"
+      style="width:100%;background:var(--surface);border:1px solid rgba(245,166,35,.5);border-radius:8px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:.88rem;padding:.55rem .9rem;outline:none;">
+      <option value="">Selecione o responsável...</option>
+    </select>
+    <div style="font-size:.65rem;color:var(--muted);margin-top:.3rem;">Obrigatório — registra quem autorizou este acesso</div>
+  </div>
   <div class="ceb-buttons">
     <button class="ceb-btn-confirm" onclick="confirmarEntrada()">✅ Confirmar Entrada</button>
     <button class="ceb-btn-edit" onclick="cebEditarCadastro()">✏️ Editar</button>
@@ -2035,6 +2078,14 @@
       <div class="rvw-item"><div class="rvw-label">Cargo / Função</div><div class="rvw-value" id="rvw-cargo"></div></div>
       <div class="rvw-item"><div class="rvw-label">Empresa</div><div class="rvw-value" id="rvw-empresa"></div></div>
       <div class="rvw-item full"><div class="rvw-label">Motivo de Entrada</div><div class="rvw-value" id="rvw-motivo"></div></div>
+      <div class="rvw-item full">
+        <div class="rvw-label" style="color:var(--accent);">👤 Responsável pela Liberação <span style="color:var(--danger);">*</span></div>
+        <select id="rvw-responsavel-sel"
+          style="width:100%;background:var(--surface);border:1px solid rgba(245,166,35,.5);border-radius:8px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:.88rem;padding:.55rem .9rem;outline:none;margin-top:.25rem;">
+          <option value="">Selecione o responsável...</option>
+        </select>
+        <div style="font-size:.65rem;color:var(--muted);margin-top:.3rem;">Obrigatório — pessoa interna que autoriza este acesso</div>
+      </div>
     </div>
   </div>
 
@@ -2132,7 +2183,7 @@ const db_fire = firebase.firestore();
 // ═══════════════════════════════════════════════════════════════
 // STATE
 // ═══════════════════════════════════════════════════════════════
-let db = { cadastro: [], dados: [], cargo: [], empresa: [], funcao: [], motivo: [] };
+let db = { cadastro: [], dados: [], cargo: [], empresa: [], funcao: [], motivo: [], responsavel: [] };
 let filtered = { cadastro: [], dados: [] };
 let sortState = { cadastro: { col: -1, asc: true }, dados: { col: -1, asc: true } };
 const PAGE_SIZE = 12;
@@ -2248,6 +2299,15 @@ function initFirebase() {
       renderConfigList('motivo');
       refreshAllDropdowns();
     }, err => console.error('motivo', err));
+
+  // Listener para responsáveis pela liberação
+  unsubscribers['responsavel'] = db_fire.collection('config_responsavel')
+    .orderBy('nome', 'asc')
+    .onSnapshot(snapshot => {
+      db.responsavel = snapshot.docs.map(doc => ({ _id: doc.id, ...doc.data() }));
+      renderConfigList('responsavel');
+      refreshAllDropdowns();
+    }, err => console.error('responsavel', err));
 }
 
 function setOnline() {
@@ -2486,8 +2546,8 @@ async function addConfigItem(tipo) {
   const list = db[tipo] || [];
   const exists = list.some(x => (x.nome||'').toUpperCase() === val);
   if (exists) { showToast('Já cadastrado!', 'error'); return; }
-  const fbCol = tipo === 'motivo' ? 'config_motivo' : 'config_' + tipo;
-  const labelMap = { cargo: 'Cargo', empresa: 'Empresa', funcao: 'Função', motivo: 'Motivo' };
+  const fbCol = tipo === 'motivo' ? 'config_motivo' : tipo === 'responsavel' ? 'config_responsavel' : 'config_' + tipo;
+  const labelMap = { cargo: 'Cargo', empresa: 'Empresa', funcao: 'Função', motivo: 'Motivo', responsavel: 'Responsável' };
   try {
     await addToFirestore(fbCol, { nome: val });
     input.value = '';
@@ -2499,7 +2559,7 @@ async function addConfigItem(tipo) {
 
 async function deleteConfigItem(tipo, id) {
   if (!confirm('Excluir este item?')) return;
-  const fbCol = tipo === 'motivo' ? 'config_motivo' : 'config_' + tipo;
+  const fbCol = tipo === 'motivo' ? 'config_motivo' : tipo === 'responsavel' ? 'config_responsavel' : 'config_' + tipo;
   try {
     await deleteFromFirestore(fbCol, id);
     showToast('Removido.');
@@ -2513,7 +2573,7 @@ async function editConfigItem(tipo, id, nomeAtual, btnEl) {
   if (!novoNome || novoNome.trim() === '') return;
   const val = novoNome.trim().toUpperCase();
   if (val === nomeAtual.toUpperCase()) return;
-  const fbCol = tipo === 'motivo' ? 'config_motivo' : 'config_' + tipo;
+  const fbCol = tipo === 'motivo' ? 'config_motivo' : tipo === 'responsavel' ? 'config_responsavel' : 'config_' + tipo;
   try {
     await db_fire.collection(fbCol).doc(id).update({ nome: val });
     showToast('Atualizado: ' + val);
@@ -2526,7 +2586,7 @@ function renderConfigList(tipo) {
   const list = document.getElementById('list-' + tipo);
   if (!list) return; // elemento pode nao existir se tipo nao tem bloco na aba config
   const items = db[tipo] || [];
-  const countMap = { cargo: 'cnt-cargos', empresa: 'cnt-empresas', funcao: 'cnt-funcoes', motivo: 'cnt-motivos' };
+  const countMap = { cargo: 'cnt-cargos', empresa: 'cnt-empresas', funcao: 'cnt-funcoes', motivo: 'cnt-motivos', responsavel: 'cnt-responsaveis' };
   const countEl = document.getElementById(countMap[tipo] || ('cnt-' + tipo));
   if (countEl) countEl.textContent = items.length;
 
@@ -2546,7 +2606,7 @@ function renderConfigList(tipo) {
 }
 
 function renderAllConfigLists() {
-  ['cargo','empresa','funcao'].forEach(renderConfigList);
+  ['cargo','empresa','funcao','responsavel'].forEach(renderConfigList);
 }
 
 // Build combined cargo+funcao list for dropdowns
@@ -2600,6 +2660,15 @@ function refreshAllDropdowns() {
   renderConfigList('empresa');
   renderConfigList('funcao');
   renderConfigList('motivo');
+  renderConfigList('responsavel');
+
+  // Selects de responsável
+  const responsavelOpts = (db.responsavel && db.responsavel.length)
+    ? db.responsavel.map(x => x.nome).sort()
+    : [];
+  updateSelect('c-responsavel-sel', responsavelOpts, 'Selecione o responsável...');
+  updateSelect('ceb-responsavel-sel', responsavelOpts, 'Selecione o responsável...');
+  updateSelect('rvw-responsavel-sel', responsavelOpts, 'Selecione o responsável...');
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -2738,11 +2807,13 @@ async function globalRegEntrada(cadastroId, e) {
     const r = db.cadastro.find(x => x._id === cadastroId);
     if (!r) return;
     const entrada = new Date().toTimeString().slice(0,5);
+    const responsavel = _pendingEntradaResponsavel || '';
     try {
       await addToFirestore('dados', {
         data: todayStr(), nome: r.nome, rg: r.rg||'', cpf: r.cpf||'',
         cargo: r.cargo||'', empresa: r.empresa||'',
         placa: '', placaTrailer: '', entrada, saida: '',
+        responsavel,
       });
       showToast(`🟢 Entrada de ${r.nome.split(' ')[0]} registrada: ${entrada}`);
       // Limpar campo de busca e fechar dropdown
@@ -2890,6 +2961,10 @@ function renderMonitor() {
           <div class="monitor-detail-label">Veículo</div>
           <div class="monitor-detail-value">${r.placa || '—'}</div>
         </div>
+        <div class="monitor-detail" style="grid-column:1/-1;">
+          <div class="monitor-detail-label" style="color:var(--accent);">👤 Responsável</div>
+          <div class="monitor-detail-value" style="color:var(--accent);">${r.responsavel || '<span style="color:var(--muted);font-style:italic;">Não informado</span>'}</div>
+        </div>
       </div>
       <div class="monitor-elapsed">Tempo dentro: <span>${elapsedTime(r.entrada)}</span></div>
       <div class="monitor-card-actions" style="margin-top:.75rem;">
@@ -2949,8 +3024,10 @@ let _rvwClockInterval = null;
 function revisarCadastro() {
   const nome   = document.getElementById('c-nome').value.trim().toUpperCase();
   const motivo = document.getElementById('c-motivo').value;
+  const responsavel = document.getElementById('c-responsavel-sel').value.trim();
   if (!nome)   { showToast('Preencha o Nome Completo', 'error'); return; }
   if (!motivo) { showToast('Selecione o Motivo de Entrada', 'error'); return; }
+  if (!responsavel) { showToast('Selecione o Responsável pela Liberação', 'error'); document.getElementById('c-responsavel-sel').focus(); return; }
 
   const rg          = document.getElementById('c-rg').value.trim();
   const cpf         = document.getElementById('c-cpf').value.trim();
@@ -2974,6 +3051,10 @@ function revisarCadastro() {
   set('rvw-cargo', cargo);
   set('rvw-empresa', empresa);
   set('rvw-motivo', motivo);
+
+  // Pré-preencher responsável no balão de revisão (se já informado no form)
+  const rvwResp = document.getElementById('rvw-responsavel-sel');
+  if (rvwResp) rvwResp.value = responsavel;
 
   // Seção veículo
   const veiculoSection = document.getElementById('rvw-veiculo-section');
@@ -3025,7 +3106,15 @@ async function confirmarCadastroEEntrada() {
   const tipoVeiculo = document.getElementById('c-tipo-veiculo').value;
   const placa       = document.getElementById('c-placa').value.trim().toUpperCase();
   const placaTrailer= document.getElementById('c-placa-trailer').value.trim().toUpperCase();
+  const responsavel = (document.getElementById('rvw-responsavel-sel').value || document.getElementById('c-responsavel-sel').value || '').trim();
   const entrada     = new Date().toTimeString().slice(0,5);
+
+  if (!responsavel) {
+    showToast('Selecione o Responsável pela Liberação', 'error');
+    document.getElementById('rvw-responsavel-sel').focus();
+    btn.disabled = false; btn.textContent = '✅ Confirmar e Liberar Entrada';
+    return;
+  }
 
   try {
     // 1. Salvar cadastro
@@ -3037,6 +3126,7 @@ async function confirmarCadastroEEntrada() {
       placa: placa || '',
       placaTrailer: placaTrailer || '',
       entrada, saida: '',
+      responsavel,
     });
 
     fecharReviewBalloon();
@@ -3106,6 +3196,7 @@ async function addDado() {
 function clearForm(prefix) {
   if (prefix === 'c') {
     ['c-nome','c-rg','c-cpf','c-placa','c-placa-trailer'].forEach(id => { const el = document.getElementById(id); if(el) el.value = ''; });
+    const respSel = document.getElementById('c-responsavel-sel'); if (respSel) respSel.value = '';
     document.getElementById('c-cargo').value = '';
     document.getElementById('c-empresa').value = '';
     document.getElementById('c-motivo').value = '';
@@ -3228,6 +3319,7 @@ function renderTable(type) {
         <td class="td-mono">${r.entrada || '—'}</td>
         <td class="td-mono">${r.saida || '—'}</td>
         <td>${statusBadge(r)}</td>
+        <td class="td-name" style="color:var(--accent);font-size:.8rem;" title="Responsável pela liberação">${r.responsavel || '<span style="color:var(--muted);font-style:italic;font-size:.75rem;">—</span>'}</td>
         <td>
           <button class="action-btn success-btn" title="Registrar saída" onclick="registerSaida('${r._id}')">🚪</button>
           <button class="action-btn" title="Editar" onclick="editRow('dados','${r._id}')">✏️</button>
@@ -3423,11 +3515,13 @@ document.getElementById('modal-save-btn').onclick = async function() {
       setTimeout(async () => {
         pedirConfirmacaoEntrada(id, async () => {
           const entrada = new Date().toTimeString().slice(0,5);
+          const responsavel = _pendingEntradaResponsavel || '';
           try {
             await addToFirestore('dados', {
               data: todayStr(), nome, rg: updates.rg||'', cpf: updates.cpf||'',
               cargo: updates.cargo||'', empresa: updates.empresa||'',
               placa: '', placaTrailer: '', entrada, saida: '',
+              responsavel,
             });
             showToast(`🟢 Entrada de ${nome.split(' ')[0]} registrada: ${entrada}`);
           } catch(err) { showToast('❌ Erro ao registrar entrada: ' + err.message, 'error'); }
@@ -3459,10 +3553,10 @@ function exportCSV(type) {
   const data = filtered[type];
   const headers = type === 'cadastro'
     ? ['NOME','RG','CPF','CARGO','EMPRESA','MOTIVO']
-    : ['DATA','PLACA','PLACA_TRAILER','NOME','RG','CPF','CARGO','EMPRESA','ENTRADA','SAIDA'];
+    : ['DATA','PLACA','PLACA_TRAILER','NOME','RG','CPF','CARGO','EMPRESA','ENTRADA','SAIDA','RESPONSAVEL'];
   const keys = type === 'cadastro'
     ? ['nome','rg','cpf','cargo','empresa','motivo']
-    : ['data','placa','placaTrailer','nome','rg','cpf','cargo','empresa','entrada','saida'];
+    : ['data','placa','placaTrailer','nome','rg','cpf','cargo','empresa','entrada','saida','responsavel'];
   const csv = [headers.join(';'), ...data.map(r => keys.map(k => `"${(r[k]||'').replace(/"/g,'""')}"`).join(';'))].join('\n');
   const a = document.createElement('a');
   a.href = URL.createObjectURL(new Blob(['\uFEFF'+csv], { type:'text/csv;charset=utf-8' }));
@@ -3562,6 +3656,7 @@ document.addEventListener('mousedown', function(e) {
 // ═══════════════════════════════════════════════════════════════
 let _pendingEntradaCadastroId = null;
 let _pendingEntradaCallback   = null;
+let _pendingEntradaResponsavel = null;
 let _cebClockInterval         = null;
 
 function pedirConfirmacaoEntrada(cadastroId, callbackFn) {
@@ -3590,20 +3685,32 @@ function pedirConfirmacaoEntrada(cadastroId, callbackFn) {
 }
 
 async function confirmarEntrada() {
+  const responsavel = (document.getElementById('ceb-responsavel-sel').value || '').trim();
+  if (!responsavel) {
+    showToast('Selecione o Responsável pela Liberação', 'error');
+    document.getElementById('ceb-responsavel-sel').focus();
+    return;
+  }
+  // Guardar responsável para uso no callback
+  _pendingEntradaResponsavel = responsavel;
   clearInterval(_cebClockInterval);
   document.getElementById('confirm-entrada-balloon').classList.remove('open');
   document.getElementById('confirm-entrada-overlay').classList.remove('open');
   if (_pendingEntradaCallback) await _pendingEntradaCallback();
   _pendingEntradaCadastroId = null;
   _pendingEntradaCallback   = null;
+  _pendingEntradaResponsavel = null;
 }
 
 function cancelConfirmEntrada() {
   clearInterval(_cebClockInterval);
   document.getElementById('confirm-entrada-balloon').classList.remove('open');
   document.getElementById('confirm-entrada-overlay').classList.remove('open');
+  const respEl = document.getElementById('ceb-responsavel-sel');
+  if (respEl) respEl.value = '';
   _pendingEntradaCadastroId = null;
   _pendingEntradaCallback   = null;
+  _pendingEntradaResponsavel = null;
 }
 
 function cebEditarCadastro() {
@@ -3757,11 +3864,13 @@ async function actionBalloonEntrada() {
     const r = db.cadastro.find(x => x._id === _acbCadastroId);
     if (!r) return;
     const entrada = new Date().toTimeString().slice(0,5);
+    const responsavel = _pendingEntradaResponsavel || '';
     try {
       await addToFirestore('dados', {
         data: todayStr(), nome: r.nome, rg: r.rg||'', cpf: r.cpf||'',
         cargo: r.cargo||'', empresa: r.empresa||'',
         placa: '', placaTrailer: '', entrada, saida: '',
+        responsavel,
       });
       showToast(`🟢 Entrada de ${r.nome.split(' ')[0]} registrada: ${entrada}`);
     } catch(err) { showToast('❌ Erro: ' + err.message, 'error'); }
@@ -4015,10 +4124,10 @@ function _printTable(type, data, titulo) {
   const hoje = new Date().toLocaleDateString('pt-BR');
   const headers = type === 'cadastro'
     ? ['Nome','RG','CPF','Cargo','Empresa','Motivo']
-    : ['Data','Placa','Trailer','Nome','RG','CPF','Cargo','Empresa','Entrada','Saída'];
+    : ['Data','Placa','Trailer','Nome','RG','CPF','Cargo','Empresa','Entrada','Saída','Responsável'];
   const keys = type === 'cadastro'
     ? ['nome','rg','cpf','cargo','empresa','motivo']
-    : ['data','placa','placaTrailer','nome','rg','cpf','cargo','empresa','entrada','saida'];
+    : ['data','placa','placaTrailer','nome','rg','cpf','cargo','empresa','entrada','saida','responsavel'];
 
   const rows = data.map(r =>
     '<tr>' + keys.map(k => `<td>${r[k]||''}</td>`).join('') + '</tr>'
@@ -4065,10 +4174,10 @@ function _exportXlsx(type, data, filename) {
   }
   const headers = type === 'cadastro'
     ? ['NOME','RG','CPF','CARGO','EMPRESA','MOTIVO']
-    : ['DATA','PLACA','PLACA_TRAILER','NOME','RG','CPF','CARGO','EMPRESA','ENTRADA','SAÍDA'];
+    : ['DATA','PLACA','PLACA_TRAILER','NOME','RG','CPF','CARGO','EMPRESA','ENTRADA','SAÍDA','RESPONSÁVEL'];
   const keys = type === 'cadastro'
     ? ['nome','rg','cpf','cargo','empresa','motivo']
-    : ['data','placa','placaTrailer','nome','rg','cpf','cargo','empresa','entrada','saida'];
+    : ['data','placa','placaTrailer','nome','rg','cpf','cargo','empresa','entrada','saida','responsavel'];
 
   const rows = data.map(r => keys.map(k => r[k] || ''));
   const ws = XLSX.utils.aoa_to_sheet([headers, ...rows]);
@@ -4085,8 +4194,8 @@ function _exportXlsx(type, data, filename) {
 // ── Export CSV Filtrado ──
 function exportRelatorioFiltradoCSV() {
   const data = getRelFiltrados();
-  const headers = ['DATA','PLACA','PLACA_TRAILER','NOME','RG','CPF','CARGO','EMPRESA','ENTRADA','SAIDA'];
-  const keys = ['data','placa','placaTrailer','nome','rg','cpf','cargo','empresa','entrada','saida'];
+  const headers = ['DATA','PLACA','PLACA_TRAILER','NOME','RG','CPF','CARGO','EMPRESA','ENTRADA','SAIDA','RESPONSAVEL'];
+  const keys = ['data','placa','placaTrailer','nome','rg','cpf','cargo','empresa','entrada','saida','responsavel'];
   const csv = [headers.join(';'), ...data.map(r => keys.map(k => `"${(r[k]||'').replace(/"/g,'""')}"`).join(';'))].join('\n');
   const a = document.createElement('a');
   a.href = URL.createObjectURL(new Blob(['\uFEFF'+csv], { type:'text/csv;charset=utf-8' }));
@@ -4111,7 +4220,9 @@ let _cfgMini = {
 
 // Colecao Firebase para motivo (novo, dedicado)
 function _cfgCollection(col) {
-  return col === 'motivo' ? 'config_motivo' : 'config_' + col;
+  if (col === 'motivo') return 'config_motivo';
+  if (col === 'responsavel') return 'config_responsavel';
+  return 'config_' + col;
 }
 
 // Abre o mini-modal para adicionar ou editar
@@ -4128,8 +4239,9 @@ function cfgMiniAbrir(col, mode, selectId) {
   _cfgMini.selectId = selectId || null;
 
   const titleMap = {
-    empresa: { add: '+ Nova Empresa', edit: 'Editar Empresa' },
-    motivo:  { add: '+ Novo Motivo',  edit: 'Editar Motivo'  },
+    empresa:     { add: '+ Nova Empresa',     edit: 'Editar Empresa'     },
+    motivo:      { add: '+ Novo Motivo',       edit: 'Editar Motivo'      },
+    responsavel: { add: '+ Novo Responsável',  edit: 'Editar Responsável' },
   };
 
   document.getElementById('cfgmm-title-text').textContent =
@@ -4137,11 +4249,11 @@ function cfgMiniAbrir(col, mode, selectId) {
 
   const input = document.getElementById('cfgmm-input');
   input.value = mode === 'edit' ? curNome : '';
-  input.placeholder = col === 'empresa' ? 'Nome da empresa...' : 'Descricao do motivo...';
+  input.placeholder = col === 'empresa' ? 'Nome da empresa...' : col === 'responsavel' ? 'Nome do responsável...' : 'Descricao do motivo...';
 
   // Localizar docId para edicao
   if (mode === 'edit') {
-    const list = col === 'motivo' ? (db.motivo || []) : (db[col] || []);
+    const list = col === 'motivo' ? (db.motivo || []) : col === 'responsavel' ? (db.responsavel || []) : (db[col] || []);
     const found = list.find(x => (x.nome || '').toUpperCase() === curNome.toUpperCase());
     _cfgMini.docId = found ? found._id : null;
     if (!_cfgMini.docId) {
@@ -4174,13 +4286,13 @@ async function cfgMiniSalvar() {
   try {
     if (_cfgMini.mode === 'add') {
       // Verificar duplicata
-      const list = col === 'motivo' ? (db.motivo || []) : (db[col] || []);
+      const list = col === 'motivo' ? (db.motivo || []) : col === 'responsavel' ? (db.responsavel || []) : (db[col] || []);
       if (list.some(x => (x.nome || '').toUpperCase() === val)) {
         showToast('Ja existe um item com esse nome.', 'error');
         saveBtn.disabled = false; saveBtn.textContent = 'Salvar'; return;
       }
       await db_fire.collection(fbCol).add({ nome: val, _createdAt: firebase.firestore.FieldValue.serverTimestamp() });
-      showToast((col === 'empresa' ? '🏢' : '📋') + ' ' + val + ' adicionado com sucesso!');
+      showToast((col === 'empresa' ? '🏢' : col === 'responsavel' ? '👤' : '📋') + ' ' + val + ' adicionado com sucesso!');
       // Apos adicionar, selecionar o novo item no select de origem
       if (_cfgMini.selectId) {
         setTimeout(() => {
@@ -4213,15 +4325,17 @@ async function cfgMiniExcluir(col, selectId) {
   if (!curNome) { showToast('Selecione um item para excluir.', 'error'); return; }
 
   const fbCol = _cfgCollection(col);
-  const list  = col === 'motivo' ? (db.motivo || []) : (db[col] || []);
+  const list  = col === 'motivo' ? (db.motivo || []) : col === 'responsavel' ? (db.responsavel || []) : (db[col] || []);
   const found = list.find(x => (x.nome || '').toUpperCase() === curNome.toUpperCase());
   if (!found) { showToast('Item nao encontrado.', 'error'); return; }
 
-  if (!confirm('Excluir "' + curNome + '" da lista de ' + (col === 'empresa' ? 'empresas' : 'motivos') + '?')) return;
+  const labelMap = { empresa: 'empresas', motivo: 'motivos', responsavel: 'responsáveis', cargo: 'cargos', funcao: 'funções' };
+  if (!confirm('Excluir "' + curNome + '" da lista de ' + (labelMap[col] || col) + '?')) return;
 
+  const emojiMap = { empresa: '🏢', responsavel: '👤', motivo: '📋' };
   try {
     await db_fire.collection(fbCol).doc(found._id).delete();
-    showToast((col === 'empresa' ? '🏢' : '📋') + ' "' + curNome + '" excluido.');
+    showToast((emojiMap[col] || '📋') + ' "' + curNome + '" excluido.');
     if (sel) sel.value = '';
   } catch(e) {
     showToast('Erro ao excluir: ' + e.message, 'error');
