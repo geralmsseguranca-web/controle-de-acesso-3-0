@@ -1028,6 +1028,110 @@
   .config-item-del:hover { border-color: var(--danger); color: var(--danger); }
   .config-empty { padding: 2rem; text-align: center; color: var(--muted); font-size: .85rem; }
 
+  /* ── Inline Config Manage buttons (next to selects in cadastro form) ── */
+  .select-manage-wrap {
+    display: flex; align-items: center; gap: .35rem;
+  }
+  .select-manage-wrap select { flex: 1; min-width: 0; }
+  .sel-mgr-btn {
+    flex-shrink: 0;
+    background: var(--card);
+    border: 1px solid var(--border);
+    color: var(--muted);
+    border-radius: 7px;
+    padding: .38rem .6rem;
+    font-size: .78rem;
+    cursor: pointer;
+    transition: all .15s;
+    line-height: 1;
+    white-space: nowrap;
+  }
+  .sel-mgr-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .sel-mgr-btn.del:hover { border-color: var(--danger); color: var(--danger); }
+  .sel-mgr-btn.add:hover { border-color: var(--success); color: var(--success); background: rgba(61,186,124,.08); }
+  /* also add edit icon on config list items */
+  .config-item-edit {
+    background: none; border: 1px solid transparent;
+    color: var(--muted); padding: .2rem .45rem;
+    border-radius: 5px; cursor: pointer; font-size: .8rem;
+    transition: all .15s; margin-right: .2rem;
+  }
+  .config-item-edit:hover { border-color: var(--accent); color: var(--accent); }
+
+  /* ── Mini-modal para adicionar/editar item de config ── */
+  #cfg-mini-modal-overlay {
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,.65);
+    backdrop-filter: blur(4px);
+    z-index: 9100;
+    display: none;
+  }
+  #cfg-mini-modal-overlay.open { display: block; }
+  #cfg-mini-modal {
+    position: fixed;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%) scale(0.88);
+    z-index: 9101;
+    background: var(--card);
+    border: 1px solid var(--accent);
+    border-radius: 16px;
+    padding: 1.75rem 2rem 1.5rem;
+    min-width: 300px; max-width: 420px; width: 92vw;
+    box-shadow: 0 24px 64px rgba(0,0,0,.75), 0 0 0 1px rgba(245,166,35,.15);
+    display: none;
+    animation: cfgMiniPop .28s cubic-bezier(.34,1.56,.64,1) forwards;
+  }
+  #cfg-mini-modal.open { display: block; }
+  @keyframes cfgMiniPop {
+    from { opacity:0; transform: translate(-50%,-50%) scale(.82); }
+    to   { opacity:1; transform: translate(-50%,-50%) scale(1); }
+  }
+  .cfgmm-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.15rem; letter-spacing: .07em;
+    color: var(--accent); margin-bottom: 1.1rem;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .cfgmm-close {
+    background: none; border: none; color: var(--muted);
+    cursor: pointer; font-size: 1.1rem; line-height: 1;
+    transition: color .15s;
+  }
+  .cfgmm-close:hover { color: var(--danger); }
+  .cfgmm-input {
+    width: 100%;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: .9rem;
+    padding: .6rem .85rem;
+    outline: none;
+    margin-bottom: 1.1rem;
+    transition: border-color .18s, box-shadow .18s;
+  }
+  .cfgmm-input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(245,166,35,.15); }
+  .cfgmm-btns { display: flex; gap: .65rem; justify-content: flex-end; }
+  .cfgmm-btn-save {
+    font-family: 'DM Sans', sans-serif;
+    font-size: .88rem; font-weight: 700;
+    padding: .6rem 1.4rem;
+    background: var(--accent); color: #0d0f14;
+    border: none; border-radius: 9px;
+    cursor: pointer; transition: all .15s;
+  }
+  .cfgmm-btn-save:hover { background: var(--accent2); transform: translateY(-1px); }
+  .cfgmm-btn-cancel {
+    font-family: 'DM Sans', sans-serif;
+    font-size: .88rem; font-weight: 600;
+    padding: .6rem 1.1rem;
+    background: transparent;
+    border: 1px solid var(--border); color: var(--muted);
+    border-radius: 9px; cursor: pointer; transition: all .15s;
+  }
+  .cfgmm-btn-cancel:hover { border-color: var(--danger); color: var(--danger); }
+
   /* search-by-wrap */
   .search-by-wrap { display: flex; gap: .5rem; align-items: center; flex: 1; min-width: 260px; }
   .search-by-select { flex: 0 0 auto; min-width: 110px; font-size: .8rem; padding: .55rem .7rem; }
@@ -1465,18 +1569,25 @@
           </div>
           <div class="form-group">
             <label>Empresa</label>
-            <select id="c-empresa">
-              <option value="">Selecione a empresa...</option>
-            </select>
+            <div class="select-manage-wrap">
+              <select id="c-empresa">
+                <option value="">Selecione a empresa...</option>
+              </select>
+              <button type="button" class="sel-mgr-btn add" title="Adicionar nova empresa" onclick="cfgMiniAbrir('empresa','add')">+</button>
+              <button type="button" class="sel-mgr-btn" title="Editar empresa selecionada" onclick="cfgMiniAbrir('empresa','edit','c-empresa')">&#9999;</button>
+              <button type="button" class="sel-mgr-btn del" title="Excluir empresa selecionada" onclick="cfgMiniExcluir('empresa','c-empresa')">&#128465;</button>
+            </div>
           </div>
           <div class="form-group">
             <label>Motivo de Entrada <span class="req">*</span></label>
-            <select id="c-motivo">
-              <option value="">Selecione...</option>
-              <option>PRESTADOR</option><option>ENTREGA</option><option>COLETA</option>
-              <option>VISITANTE</option><option>DESCARGA</option><option>ENTREVISTA</option>
-              <option>MANUTENÇÃO</option><option>FUNCIONÁRIO</option><option>OUTRO</option>
-            </select>
+            <div class="select-manage-wrap">
+              <select id="c-motivo">
+                <option value="">Selecione...</option>
+              </select>
+              <button type="button" class="sel-mgr-btn add" title="Adicionar novo motivo" onclick="cfgMiniAbrir('motivo','add')">+</button>
+              <button type="button" class="sel-mgr-btn" title="Editar motivo selecionado" onclick="cfgMiniAbrir('motivo','edit','c-motivo')">&#9999;</button>
+              <button type="button" class="sel-mgr-btn del" title="Excluir motivo selecionado" onclick="cfgMiniExcluir('motivo','c-motivo')">&#128465;</button>
+            </div>
           </div>
         </div>
 
@@ -1668,6 +1779,27 @@
           </div>
         </div>
       </div>
+
+      <!-- MOTIVOS DE ENTRADA -->
+      <div class="config-block">
+        <div class="config-block-header">
+          <div class="config-block-title">📋 Motivos de Entrada</div>
+          <span class="config-block-count" id="cnt-motivos">0</span>
+        </div>
+        <div class="config-add-row">
+          <input type="text" id="new-motivo" placeholder="Novo motivo de entrada..." maxlength="60"
+            onkeydown="if(event.key==='Enter') addConfigItem('motivo')">
+          <button class="config-add-btn" onclick="addConfigItem('motivo')">+ Adicionar</button>
+        </div>
+        <div class="config-list" id="list-motivo">
+          <div class="config-empty">Nenhum motivo cadastrado. Os motivos padrão serão usados.</div>
+        </div>
+        <div style="padding:.75rem 1.25rem;background:rgba(245,166,35,.06);border-top:1px solid var(--border);">
+          <div style="font-size:.72rem;color:var(--muted);line-height:1.5;">
+            💡 Os <strong style="color:var(--accent);">Motivos de Entrada</strong> aparecem no campo obrigatório do formulário de cadastro. Se nenhum for cadastrado, os motivos padrão são usados.
+          </div>
+        </div>
+      </div>
     </div>
 
     <!-- PREVIEW DAS LISTAS -->
@@ -1815,6 +1947,21 @@
       <canvas id="rel-chart-bar" style="max-height:260px;margin-top:1rem;"></canvas>
     </div>
   </div>
+<!-- MINI-MODAL CONFIG (Adicionar/Editar Empresa ou Motivo a partir do Cadastro) -->
+<div id="cfg-mini-modal-overlay" onclick="cfgMiniFechar()"></div>
+<div id="cfg-mini-modal">
+  <div class="cfgmm-title">
+    <span id="cfgmm-title-text">Adicionar item</span>
+    <button class="cfgmm-close" onclick="cfgMiniFechar()">&#x2715;</button>
+  </div>
+  <input type="text" class="cfgmm-input" id="cfgmm-input" placeholder="Digite o nome..." maxlength="80"
+    onkeydown="if(event.key==='Enter') cfgMiniSalvar()">
+  <div class="cfgmm-btns">
+    <button class="cfgmm-btn-cancel" onclick="cfgMiniFechar()">Cancelar</button>
+    <button class="cfgmm-btn-save" id="cfgmm-save-btn" onclick="cfgMiniSalvar()">Salvar</button>
+  </div>
+</div>
+
 </main>
 
 <!-- ══ MODAL (edit) ══ -->
@@ -1975,13 +2122,17 @@ const firebaseConfig = {
   appId:             "1:577925992628:web:b756b9192dbeed2e74c7e1"
 };
 
+if (typeof firebase === 'undefined') {
+  document.getElementById('loading-overlay').innerHTML = '<div style="text-align:center;padding:2rem;"><div style="font-size:3rem;margin-bottom:1rem;">⚠️</div><div style="font-family:Bebas Neue,sans-serif;font-size:1.4rem;color:#f5a623;letter-spacing:.1em;">ERRO DE CONEXÃO</div><div style="color:#7a8099;font-size:.9rem;margin-top:.75rem;line-height:1.6;">Não foi possível carregar o Firebase SDK.<br>Verifique sua conexão com a internet<br>e recarregue a página.</div></div>';
+  throw new Error('Firebase SDK not loaded');
+}
 firebase.initializeApp(firebaseConfig);
 const db_fire = firebase.firestore();
 
 // ═══════════════════════════════════════════════════════════════
 // STATE
 // ═══════════════════════════════════════════════════════════════
-let db = { cadastro: [], dados: [], cargo: [], empresa: [], funcao: [] };
+let db = { cadastro: [], dados: [], cargo: [], empresa: [], funcao: [], motivo: [] };
 let filtered = { cadastro: [], dados: [] };
 let sortState = { cadastro: { col: -1, asc: true }, dados: { col: -1, asc: true } };
 const PAGE_SIZE = 12;
@@ -2088,6 +2239,15 @@ function initFirebase() {
         refreshAllDropdowns();
       }, err => console.error(col, err));
   });
+
+  // Listener para motivos de entrada
+  unsubscribers['motivo'] = db_fire.collection('config_motivo')
+    .orderBy('nome', 'asc')
+    .onSnapshot(snapshot => {
+      db.motivo = snapshot.docs.map(doc => ({ _id: doc.id, ...doc.data() }));
+      renderConfigList('motivo');
+      refreshAllDropdowns();
+    }, err => console.error('motivo', err));
 }
 
 function setOnline() {
@@ -2323,12 +2483,15 @@ async function addConfigItem(tipo) {
   const input = document.getElementById('new-' + tipo);
   const val = input.value.trim().toUpperCase();
   if (!val) { showToast('Digite um valor.', 'error'); return; }
-  const exists = db[tipo].some(x => x.nome.toUpperCase() === val);
+  const list = db[tipo] || [];
+  const exists = list.some(x => (x.nome||'').toUpperCase() === val);
   if (exists) { showToast('Já cadastrado!', 'error'); return; }
+  const fbCol = tipo === 'motivo' ? 'config_motivo' : 'config_' + tipo;
+  const labelMap = { cargo: 'Cargo', empresa: 'Empresa', funcao: 'Função', motivo: 'Motivo' };
   try {
-    await addToFirestore('config_' + tipo, { nome: val });
+    await addToFirestore(fbCol, { nome: val });
     input.value = '';
-    showToast(`✅ ${tipo === 'cargo' ? 'Cargo' : tipo === 'empresa' ? 'Empresa' : 'Função'} adicionado!`);
+    showToast('✅ ' + (labelMap[tipo] || tipo) + ' adicionado!');
   } catch(e) {
     showToast('❌ Erro: ' + e.message, 'error');
   }
@@ -2336,29 +2499,50 @@ async function addConfigItem(tipo) {
 
 async function deleteConfigItem(tipo, id) {
   if (!confirm('Excluir este item?')) return;
+  const fbCol = tipo === 'motivo' ? 'config_motivo' : 'config_' + tipo;
   try {
-    await deleteFromFirestore('config_' + tipo, id);
+    await deleteFromFirestore(fbCol, id);
     showToast('Removido.');
   } catch(e) {
     showToast('❌ Erro: ' + e.message, 'error');
   }
 }
 
+async function editConfigItem(tipo, id, nomeAtual, btnEl) {
+  const novoNome = prompt('Editar nome de "' + nomeAtual + '":', nomeAtual);
+  if (!novoNome || novoNome.trim() === '') return;
+  const val = novoNome.trim().toUpperCase();
+  if (val === nomeAtual.toUpperCase()) return;
+  const fbCol = tipo === 'motivo' ? 'config_motivo' : 'config_' + tipo;
+  try {
+    await db_fire.collection(fbCol).doc(id).update({ nome: val });
+    showToast('Atualizado: ' + val);
+  } catch(e) {
+    showToast('Erro: ' + e.message, 'error');
+  }
+}
+
 function renderConfigList(tipo) {
   const list = document.getElementById('list-' + tipo);
-  const items = db[tipo];
-  const countEl = document.getElementById('cnt-' + (tipo === 'cargo' ? 'cargos' : tipo === 'empresa' ? 'empresas' : 'funcoes'));
+  if (!list) return; // elemento pode nao existir se tipo nao tem bloco na aba config
+  const items = db[tipo] || [];
+  const countMap = { cargo: 'cnt-cargos', empresa: 'cnt-empresas', funcao: 'cnt-funcoes', motivo: 'cnt-motivos' };
+  const countEl = document.getElementById(countMap[tipo] || ('cnt-' + tipo));
   if (countEl) countEl.textContent = items.length;
 
   if (!items.length) {
     list.innerHTML = `<div class="config-empty">Nenhum item cadastrado.</div>`;
     return;
   }
-  list.innerHTML = items.map(item => `
-    <div class="config-item">
-      <span class="config-item-name">${item.nome}</span>
-      <button class="config-item-del" onclick="deleteConfigItem('${tipo}','${item._id}')" title="Excluir">✕</button>
-    </div>`).join('');
+  list.innerHTML = items.map(item => {
+    const nomeEsc = item.nome.replace(/'/g, '&#39;');
+    return '<div class="config-item">' +
+      '<span class="config-item-name">' + item.nome + '</span>' +
+      '<div style="display:flex;gap:.2rem;align-items:center;">' +
+        '<button class="config-item-edit" onclick="editConfigItem(\'' + tipo + '\',\'' + item._id + '\',\'' + nomeEsc + '\',this)" title="Editar">&#9999;</button>' +
+        '<button class="config-item-del" onclick="deleteConfigItem(\'' + tipo + '\',\'' + item._id + '\')" title="Excluir">&#10005;</button>' +
+      '</div></div>';
+  }).join('');
 }
 
 function renderAllConfigLists() {
@@ -2387,6 +2571,11 @@ function refreshAllDropdowns() {
 
   updateSelect('c-cargo', cargoOpts, 'Selecione o cargo...');
   updateSelect('c-empresa', empresaOpts, 'Selecione a empresa...');
+  // Motivos de entrada: usar config_motivo; fallback para defaults se vazio
+  const motivoOpts = (db.motivo && db.motivo.length)
+    ? db.motivo.map(x => x.nome).sort()
+    : ['PRESTADOR','ENTREGA','COLETA','VISITANTE','DESCARGA','ENTREVISTA','MANUTENCAO','FUNCIONARIO','OUTRO'];
+  updateSelect('c-motivo', motivoOpts, 'Selecione...');
   updateSelect('d-cargo', cargoOpts, 'Selecione o cargo...');
   updateSelect('d-empresa', empresaOpts, 'Selecione a empresa...');
   updateSelect('preview-cargo', cargoOpts, 'Selecione...');
@@ -2410,6 +2599,7 @@ function refreshAllDropdowns() {
   renderConfigList('cargo');
   renderConfigList('empresa');
   renderConfigList('funcao');
+  renderConfigList('motivo');
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -3904,6 +4094,145 @@ function exportRelatorioFiltradoCSV() {
   a.click();
   showToast('📊 CSV filtrado exportado!');
 }
+
+// =============================================================
+// GERENCIAMENTO INLINE DE CONFIG (Empresa / Motivo de Entrada)
+// Permite adicionar, editar e excluir direto da tela de cadastro.
+// Tudo sincroniza com Firebase e atualiza a aba Configuracoes.
+// =============================================================
+
+// --- Estado do mini-modal ---
+let _cfgMini = {
+  col: null,        // 'empresa' | 'motivo'
+  mode: null,       // 'add' | 'edit'
+  docId: null,      // id do doc Firebase (somente no modo 'edit')
+  selectId: null,   // id do <select> de origem (para re-selecionar apos salvar)
+};
+
+// Colecao Firebase para motivo (novo, dedicado)
+function _cfgCollection(col) {
+  return col === 'motivo' ? 'config_motivo' : 'config_' + col;
+}
+
+// Abre o mini-modal para adicionar ou editar
+function cfgMiniAbrir(col, mode, selectId) {
+  const sel = selectId ? document.getElementById(selectId) : null;
+  const curNome = (sel && sel.value) ? sel.value : '';
+
+  if (mode === 'edit' && !curNome) {
+    showToast('Selecione um item para editar.', 'error'); return;
+  }
+
+  _cfgMini.col      = col;
+  _cfgMini.mode     = mode;
+  _cfgMini.selectId = selectId || null;
+
+  const titleMap = {
+    empresa: { add: '+ Nova Empresa', edit: 'Editar Empresa' },
+    motivo:  { add: '+ Novo Motivo',  edit: 'Editar Motivo'  },
+  };
+
+  document.getElementById('cfgmm-title-text').textContent =
+    (titleMap[col] && titleMap[col][mode]) || (mode === 'add' ? '+ Adicionar' : 'Editar');
+
+  const input = document.getElementById('cfgmm-input');
+  input.value = mode === 'edit' ? curNome : '';
+  input.placeholder = col === 'empresa' ? 'Nome da empresa...' : 'Descricao do motivo...';
+
+  // Localizar docId para edicao
+  if (mode === 'edit') {
+    const list = col === 'motivo' ? (db.motivo || []) : (db[col] || []);
+    const found = list.find(x => (x.nome || '').toUpperCase() === curNome.toUpperCase());
+    _cfgMini.docId = found ? found._id : null;
+    if (!_cfgMini.docId) {
+      showToast('Item nao encontrado no banco. Tente recarregar.', 'error'); return;
+    }
+  } else {
+    _cfgMini.docId = null;
+  }
+
+  document.getElementById('cfg-mini-modal-overlay').classList.add('open');
+  document.getElementById('cfg-mini-modal').classList.add('open');
+  setTimeout(() => input.focus(), 80);
+}
+
+function cfgMiniFechar() {
+  document.getElementById('cfg-mini-modal-overlay').classList.remove('open');
+  document.getElementById('cfg-mini-modal').classList.remove('open');
+  _cfgMini = { col: null, mode: null, docId: null, selectId: null };
+}
+
+async function cfgMiniSalvar() {
+  const val = document.getElementById('cfgmm-input').value.trim().toUpperCase();
+  if (!val) { showToast('Digite um nome valido.', 'error'); return; }
+
+  const col = _cfgMini.col;
+  const fbCol = _cfgCollection(col);
+  const saveBtn = document.getElementById('cfgmm-save-btn');
+  saveBtn.disabled = true; saveBtn.textContent = '...';
+
+  try {
+    if (_cfgMini.mode === 'add') {
+      // Verificar duplicata
+      const list = col === 'motivo' ? (db.motivo || []) : (db[col] || []);
+      if (list.some(x => (x.nome || '').toUpperCase() === val)) {
+        showToast('Ja existe um item com esse nome.', 'error');
+        saveBtn.disabled = false; saveBtn.textContent = 'Salvar'; return;
+      }
+      await db_fire.collection(fbCol).add({ nome: val, _createdAt: firebase.firestore.FieldValue.serverTimestamp() });
+      showToast((col === 'empresa' ? '🏢' : '📋') + ' ' + val + ' adicionado com sucesso!');
+      // Apos adicionar, selecionar o novo item no select de origem
+      if (_cfgMini.selectId) {
+        setTimeout(() => {
+          const s = document.getElementById(_cfgMini.selectId);
+          if (s) s.value = val;
+        }, 800);
+      }
+    } else {
+      // Edicao
+      await db_fire.collection(fbCol).doc(_cfgMini.docId).update({ nome: val });
+      showToast('Atualizado: ' + val);
+      if (_cfgMini.selectId) {
+        setTimeout(() => {
+          const s = document.getElementById(_cfgMini.selectId);
+          if (s) s.value = val;
+        }, 800);
+      }
+    }
+    cfgMiniFechar();
+  } catch(e) {
+    showToast('Erro: ' + e.message, 'error');
+  } finally {
+    saveBtn.disabled = false; saveBtn.textContent = 'Salvar';
+  }
+}
+
+async function cfgMiniExcluir(col, selectId) {
+  const sel = document.getElementById(selectId);
+  const curNome = sel ? sel.value : '';
+  if (!curNome) { showToast('Selecione um item para excluir.', 'error'); return; }
+
+  const fbCol = _cfgCollection(col);
+  const list  = col === 'motivo' ? (db.motivo || []) : (db[col] || []);
+  const found = list.find(x => (x.nome || '').toUpperCase() === curNome.toUpperCase());
+  if (!found) { showToast('Item nao encontrado.', 'error'); return; }
+
+  if (!confirm('Excluir "' + curNome + '" da lista de ' + (col === 'empresa' ? 'empresas' : 'motivos') + '?')) return;
+
+  try {
+    await db_fire.collection(fbCol).doc(found._id).delete();
+    showToast((col === 'empresa' ? '🏢' : '📋') + ' "' + curNome + '" excluido.');
+    if (sel) sel.value = '';
+  } catch(e) {
+    showToast('Erro ao excluir: ' + e.message, 'error');
+  }
+}
+
+// Fechar mini-modal com ESC
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') cfgMiniFechar();
+});
+
 
 initFirebase();
 </script>
