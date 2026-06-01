@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Controle de Acesso — Portaria V3.0</title>
-<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&family=Orbitron:wght@700;900&display=swap" rel="stylesheet">
 
 <!-- Firebase SDK v10 (modular via compat CDN) -->
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
@@ -1532,6 +1532,10 @@
     <button class="tab-btn" onclick="switchTab('relatorios', this)">
       📈 Relatórios
     </button>
+    <button class="tab-btn" onclick="switchTab('historico', this)">
+      🗄️ Histórico
+      <span class="tab-count" id="cnt-historico" style="background:rgba(74,158,255,.15);color:var(--info);">0</span>
+    </button>
   </div>
 
   <!-- ══ ABA 1: REGISTRO DE ACESSOS ══ -->
@@ -1997,6 +2001,168 @@
   </div>
 </div>
 
+  <!-- ══ ABA HISTÓRICO ══ -->
+  <div id="panel-historico" class="tab-panel">
+
+    <!-- Stats do histórico -->
+    <div class="stats-row" id="stats-historico"></div>
+
+    <!-- Toolbar de busca e filtros -->
+    <div class="filter-bar" style="margin-bottom:1rem;">
+      <div style="display:flex;gap:.6rem;flex-wrap:wrap;align-items:flex-end;width:100%;">
+
+        <!-- Busca texto -->
+        <div style="position:relative;flex:1;min-width:200px;">
+          <span style="position:absolute;left:.8rem;top:50%;transform:translateY(-50%);color:var(--muted);font-size:.9rem;">🔍</span>
+          <input id="hist-search" type="text" placeholder="Nome, RG, CPF, placa, empresa…"
+            style="width:100%;padding:.48rem .9rem .48rem 2.3rem;background:var(--card);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:.875rem;"
+            oninput="renderHistorico()">
+        </div>
+
+        <!-- Aba: Cadastros ou Acessos -->
+        <div style="display:flex;background:var(--card);border:1px solid var(--border);border-radius:8px;overflow:hidden;flex-shrink:0;">
+          <button id="hist-tab-cad" class="search-mode-btn active" onclick="setHistTab('cadastro')">👤 Cadastros</button>
+          <button id="hist-tab-aces" class="search-mode-btn" onclick="setHistTab('acessos')">📋 Acessos</button>
+        </div>
+
+        <!-- Filtro empresa -->
+        <select id="hist-filt-empresa"
+          style="background:var(--card);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:.82rem;padding:.48rem .75rem;"
+          onchange="renderHistorico()">
+          <option value="">Empresa (todas)</option>
+        </select>
+
+        <!-- Filtro cargo -->
+        <select id="hist-filt-cargo"
+          style="background:var(--card);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:.82rem;padding:.48rem .75rem;"
+          onchange="renderHistorico()">
+          <option value="">Cargo (todos)</option>
+        </select>
+
+        <!-- Filtro data início (só acessos) -->
+        <input type="date" id="hist-data-ini"
+          style="background:var(--card);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:'DM Mono',monospace;font-size:.82rem;padding:.48rem .7rem;display:none;"
+          onchange="renderHistorico()">
+        <input type="date" id="hist-data-fim"
+          style="background:var(--card);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:'DM Mono',monospace;font-size:.82rem;padding:.48rem .7rem;display:none;"
+          onchange="renderHistorico()">
+
+        <!-- Botão limpar -->
+        <button onclick="limparFiltrosHistorico()"
+          style="background:var(--highlight);border:1px solid var(--border);border-radius:8px;color:var(--muted);font-family:'DM Sans',sans-serif;font-size:.82rem;padding:.48rem .9rem;cursor:pointer;">
+          ✕ Limpar
+        </button>
+      </div>
+    </div>
+
+
+    <!-- ── Barra de Exportação do Histórico ── -->
+    <div id="hist-export-bar" style="
+      display:flex;gap:.6rem;flex-wrap:wrap;align-items:center;
+      background:var(--card);border:1px solid var(--border);
+      border-radius:10px;padding:.65rem 1rem;margin-bottom:1rem;
+    ">
+      <span style="font-size:.78rem;font-weight:600;color:var(--muted);letter-spacing:.07em;text-transform:uppercase;flex-shrink:0;">Exportar</span>
+      <div style="flex:1;height:1px;background:var(--border);min-width:8px;"></div>
+
+      <!-- PDF -->
+      <button onclick="exportHistoricoPDF()" style="
+        display:flex;align-items:center;gap:.45rem;
+        background:linear-gradient(135deg,#c0392b,#e74c3c);
+        border:none;border-radius:8px;color:#fff;
+        font-family:'DM Sans',sans-serif;font-size:.82rem;font-weight:600;
+        padding:.5rem 1.1rem;cursor:pointer;
+        box-shadow:0 2px 8px rgba(231,76,60,.35);
+        transition:transform .15s,box-shadow .15s;
+        letter-spacing:.03em;"
+        onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 5px 16px rgba(231,76,60,.5)';"
+        onmouseout="this.style.transform='';this.style.boxShadow='0 2px 8px rgba(231,76,60,.35)';">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+          <polyline points="14 2 14 8 20 8"/>
+          <line x1="12" y1="18" x2="12" y2="12"/>
+          <line x1="9" y1="15" x2="15" y2="15"/>
+        </svg>
+        PDF
+      </button>
+
+      <!-- Excel -->
+      <button onclick="exportHistoricoExcel()" style="
+        display:flex;align-items:center;gap:.45rem;
+        background:linear-gradient(135deg,#1e7e34,#28a745);
+        border:none;border-radius:8px;color:#fff;
+        font-family:'DM Sans',sans-serif;font-size:.82rem;font-weight:600;
+        padding:.5rem 1.1rem;cursor:pointer;
+        box-shadow:0 2px 8px rgba(40,167,69,.35);
+        transition:transform .15s,box-shadow .15s;
+        letter-spacing:.03em;"
+        onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 5px 16px rgba(40,167,69,.5)';"
+        onmouseout="this.style.transform='';this.style.boxShadow='0 2px 8px rgba(40,167,69,.35)';">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+          <polyline points="14 2 14 8 20 8"/>
+          <line x1="16" y1="13" x2="8" y2="13"/>
+          <line x1="16" y1="17" x2="8" y2="17"/>
+          <polyline points="10 9 9 9 8 9"/>
+        </svg>
+        Excel
+      </button>
+
+      <!-- Indicador dinâmico -->
+      <span id="hist-export-hint" style="font-size:.75rem;color:var(--muted);font-family:'DM Mono',monospace;margin-left:.2rem;"></span>
+    </div>
+
+    <!-- Tabela Cadastros -->
+    <div id="hist-panel-cadastro">
+      <div class="table-wrap">
+        <table class="table" id="hist-table-cadastro">
+          <thead>
+            <tr>
+              <th onclick="histSort('cadastro','nome')">Nome ↕</th>
+              <th onclick="histSort('cadastro','rg')">RG ↕</th>
+              <th onclick="histSort('cadastro','cpf')">CPF ↕</th>
+              <th onclick="histSort('cadastro','cargo')">Cargo ↕</th>
+              <th onclick="histSort('cadastro','empresa')">Empresa ↕</th>
+              <th onclick="histSort('cadastro','motivo')">Motivo ↕</th>
+              <th>Acessos</th>
+              <th>Último acesso</th>
+              <th style="width:90px;">Ações</th>
+            </tr>
+          </thead>
+          <tbody id="hist-tbody-cadastro"></tbody>
+        </table>
+      </div>
+      <div id="hist-pg-cadastro" class="pagination"></div>
+    </div>
+
+    <!-- Tabela Acessos -->
+    <div id="hist-panel-acessos" style="display:none;">
+      <div class="table-wrap">
+        <table class="table" id="hist-table-acessos">
+          <thead>
+            <tr>
+              <th onclick="histSort('acessos','data')">Data ↕</th>
+              <th onclick="histSort('acessos','nome')">Nome ↕</th>
+              <th onclick="histSort('acessos','rg')">RG ↕</th>
+              <th onclick="histSort('acessos','cpf')">CPF ↕</th>
+              <th onclick="histSort('acessos','cargo')">Cargo ↕</th>
+              <th onclick="histSort('acessos','empresa')">Empresa ↕</th>
+              <th>Placa</th>
+              <th onclick="histSort('acessos','entrada')">Entrada ↕</th>
+              <th onclick="histSort('acessos','saida')">Saída ↕</th>
+              <th>Status</th>
+              <th>Responsável</th>
+              <th style="width:90px;">Ações</th>
+            </tr>
+          </thead>
+          <tbody id="hist-tbody-acessos"></tbody>
+        </table>
+      </div>
+      <div id="hist-pg-acessos" class="pagination"></div>
+    </div>
+
+  </div>
+
 </main>
 
 <!-- ══ MODAL (edit) ══ -->
@@ -2267,6 +2433,7 @@ function initFirebase() {
       db.cadastro = snapshot.docs.map(doc => ({ _id: doc.id, ...doc.data() }));
       filterTable('cadastro');
       renderStats('cadastro');
+      if (document.getElementById('panel-historico').classList.contains('active')) renderHistorico();
     }, err => { console.error(err); setOffline(); });
 
   unsubscribers.dados = db_fire.collection('dados')
@@ -2278,6 +2445,7 @@ function initFirebase() {
       renderMonitor();
       hideLoading();
       setOnline();
+      if (document.getElementById('panel-historico').classList.contains('active')) renderHistorico();
     }, err => { console.error(err); setOffline(); });
 
   // Config collections
@@ -2524,6 +2692,7 @@ function switchTab(name, btn) {
   if (name === 'monitor') renderMonitor();
   if (name === 'config') renderAllConfigLists();
   if (name === 'relatorios') renderRelatoriosStats();
+  if (name === 'historico') renderHistorico();
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -4110,6 +4279,57 @@ function renderRelatoriosStats() {
   });
 }
 
+
+// ── Export Histórico (PDF) ──
+function exportHistoricoPDF() {
+  const isAcessos = document.getElementById('hist-tab-aces').classList.contains('active');
+  const type = isAcessos ? 'acessos' : 'cadastro';
+  const data = getHistoricoFiltrado(type);
+  const titulo = isAcessos ? 'Histórico de Acessos' : 'Histórico de Cadastros';
+  _printTable(isAcessos ? 'dados' : 'cadastro', data, titulo);
+}
+
+// ── Export Histórico (Excel) ──
+function exportHistoricoExcel() {
+  const isAcessos = document.getElementById('hist-tab-aces').classList.contains('active');
+  const type = isAcessos ? 'acessos' : 'cadastro';
+  const data = getHistoricoFiltrado(type);
+  const fname = isAcessos ? 'historico_acessos' : 'historico_cadastros';
+  _exportXlsx(isAcessos ? 'dados' : 'cadastro', data, fname);
+}
+
+// ── Retorna dados do histórico com filtros aplicados ──
+function getHistoricoFiltrado(type) {
+  const search = (document.getElementById('hist-search')?.value || '').toLowerCase();
+  const empresa = document.getElementById('hist-filt-empresa')?.value || '';
+  const cargo   = document.getElementById('hist-filt-cargo')?.value || '';
+  const dataIni = document.getElementById('hist-data-ini')?.value || '';
+  const dataFim = document.getElementById('hist-data-fim')?.value || '';
+
+  const source = type === 'acessos' ? db.dados : db.cadastro;
+  return source.filter(r => {
+    const haystack = Object.values(r).join(' ').toLowerCase();
+    if (search && !haystack.includes(search)) return false;
+    if (empresa && r.empresa !== empresa) return false;
+    if (cargo   && r.cargo   !== cargo)   return false;
+    if (type === 'acessos') {
+      if (dataIni && r.data < dataIni) return false;
+      if (dataFim && r.data > dataFim) return false;
+    }
+    return true;
+  });
+}
+
+// ── Atualiza hint dinâmico da barra de exportação ──
+function updateHistExportHint() {
+  const hint = document.getElementById('hist-export-hint');
+  if (!hint) return;
+  const isAcessos = document.getElementById('hist-tab-aces')?.classList.contains('active');
+  const type = isAcessos ? 'acessos' : 'cadastro';
+  const count = getHistoricoFiltrado(type).length;
+  hint.textContent = count + ' registro' + (count !== 1 ? 's' : '') + ' visível' + (count !== 1 ? 'is' : '');
+}
+
 // ── Export PDF (print-based) ──
 function exportRelatorioPDF(type) {
   const data = type === 'cadastro' ? db.cadastro : db.dados;
@@ -4348,7 +4568,326 @@ document.addEventListener('keydown', function(e) {
 });
 
 
+// ═══════════════════════════════════════════════════════════════
+// HISTÓRICO
+// ═══════════════════════════════════════════════════════════════
+let histTab = 'cadastro'; // 'cadastro' | 'acessos'
+let histSortState = {
+  cadastro: { col: 'nome', asc: true },
+  acessos:  { col: 'data', asc: false }
+};
+let histPages = { cadastro: 1, acessos: 1 };
+const HIST_PAGE = 15;
+
+function setHistTab(tab) {
+  histTab = tab;
+  histPages.cadastro = 1;
+  histPages.acessos  = 1;
+  document.getElementById('hist-tab-cad').classList.toggle('active', tab === 'cadastro');
+  document.getElementById('hist-tab-aces').classList.toggle('active', tab === 'acessos');
+  document.getElementById('hist-panel-cadastro').style.display = tab === 'cadastro' ? '' : 'none';
+  document.getElementById('hist-panel-acessos').style.display  = tab === 'acessos'  ? '' : 'none';
+  // Mostrar/ocultar filtros de data
+  document.getElementById('hist-data-ini').style.display = tab === 'acessos' ? '' : 'none';
+  document.getElementById('hist-data-fim').style.display = tab === 'acessos' ? '' : 'none';
+  renderHistorico();
+}
+
+function histSort(tab, col) {
+  if (histSortState[tab].col === col) {
+    histSortState[tab].asc = !histSortState[tab].asc;
+  } else {
+    histSortState[tab].col = col;
+    histSortState[tab].asc = true;
+  }
+  histPages[tab] = 1;
+  renderHistorico();
+}
+
+function limparFiltrosHistorico() {
+  document.getElementById('hist-search').value = '';
+  document.getElementById('hist-filt-empresa').value = '';
+  document.getElementById('hist-filt-cargo').value = '';
+  document.getElementById('hist-data-ini').value = '';
+  document.getElementById('hist-data-fim').value = '';
+  renderHistorico();
+}
+
+function populateHistFiltros() {
+  const empSel  = document.getElementById('hist-filt-empresa');
+  const cargSel = document.getElementById('hist-filt-cargo');
+  if (!empSel || !cargSel) return;
+  const curEmp  = empSel.value;
+  const curCarg = cargSel.value;
+
+  const empresas = [...new Set([
+    ...db.empresa.map(x => x.nome),
+    ...db.cadastro.map(r => r.empresa).filter(Boolean)
+  ])].sort();
+  const cargos = [...new Set([
+    ...db.cargo.map(x => x.nome),
+    ...db.cadastro.map(r => r.cargo).filter(Boolean)
+  ])].sort();
+
+  empSel.innerHTML  = '<option value="">Empresa (todas)</option>' + empresas.map(e => `<option ${e===curEmp?'selected':''}>${e}</option>`).join('');
+  cargSel.innerHTML = '<option value="">Cargo (todos)</option>' + cargos.map(c => `<option ${c===curCarg?'selected':''}>${c}</option>`).join('');
+}
+
+function renderHistorico() {
+  populateHistFiltros();
+  if (histTab === 'cadastro') renderHistCadastro();
+  else renderHistAcessos();
+  updateHistExportHint();
+}
+
+/* ── HISTÓRICO DE CADASTROS ── */
+function renderHistCadastro() {
+  const q       = (document.getElementById('hist-search').value || '').toLowerCase().trim();
+  const empresa = (document.getElementById('hist-filt-empresa').value || '');
+  const cargo   = (document.getElementById('hist-filt-cargo').value || '');
+
+  let data = db.cadastro.filter(r => {
+    if (empresa && (r.empresa||'').toUpperCase() !== empresa.toUpperCase()) return false;
+    if (cargo   && (r.cargo||'').toUpperCase() !== cargo.toUpperCase())     return false;
+    if (q) {
+      const haystack = [r.nome, r.rg, r.cpf, r.cargo, r.empresa, r.motivo].join(' ').toLowerCase();
+      if (!haystack.includes(q)) return false;
+    }
+    return true;
+  });
+
+  // Ordenação
+  const { col, asc } = histSortState.cadastro;
+  data.sort((a, b) => {
+    const va = (a[col] || '').toString().toLowerCase();
+    const vb = (b[col] || '').toString().toLowerCase();
+    return asc ? va.localeCompare(vb) : vb.localeCompare(va);
+  });
+
+  // Contar acessos e último acesso por cadastro (por nome+cpf)
+  const acessosPorNome = {};
+  db.dados.forEach(d => {
+    const k = (d.cpf || d.nome || '').toLowerCase();
+    if (!acessosPorNome[k]) acessosPorNome[k] = { count: 0, ultimo: '' };
+    acessosPorNome[k].count++;
+    if (d.data) {
+      const [dd,mm,yy] = d.data.split('/');
+      const iso = `${yy}-${mm}-${dd}`;
+      if (!acessosPorNome[k].ultimo || iso > acessosPorNome[k].ultimo) {
+        acessosPorNome[k].ultimo = iso;
+        acessosPorNome[k].ultimoFmt = d.data;
+      }
+    }
+  });
+
+  // Atualiza contador tab
+  document.getElementById('cnt-historico').textContent = data.length;
+
+  // Stats
+  const el = document.getElementById('stats-historico');
+  if (el) el.innerHTML = `
+    <div class="stat-card"><div class="stat-value" style="color:var(--info)">${db.cadastro.length}</div><div class="stat-label">Total Cadastros</div></div>
+    <div class="stat-card"><div class="stat-value">${db.dados.length}</div><div class="stat-label">Total Acessos</div></div>
+    <div class="stat-card"><div class="stat-value" style="color:var(--success)">${new Set(db.dados.map(r=>r.data)).size}</div><div class="stat-label">Dias com Registro</div></div>
+    <div class="stat-card"><div class="stat-value" style="color:var(--accent)">${new Set(db.dados.map(r=>(r.empresa||'').toUpperCase()).filter(Boolean)).size}</div><div class="stat-label">Empresas</div></div>
+    <div class="stat-card"><div class="stat-value">${new Set(db.dados.map(r=>(r.placa||'')).filter(Boolean)).size}</div><div class="stat-label">Veículos Únicos</div></div>`;
+
+  const tbody = document.getElementById('hist-tbody-cadastro');
+  if (!tbody) return;
+
+  const pg    = histPages.cadastro;
+  const start = (pg - 1) * HIST_PAGE;
+  const slice = data.slice(start, start + HIST_PAGE);
+
+  if (data.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="9"><div class="empty-state"><div class="empty-icon">🗂️</div><div class="empty-text">Nenhum cadastro encontrado.</div></div></td></tr>`;
+    document.getElementById('hist-pg-cadastro').innerHTML = '';
+    return;
+  }
+
+  tbody.innerHTML = slice.map(r => {
+    const k = (r.cpf || r.nome || '').toLowerCase();
+    const ac = acessosPorNome[k] || { count: 0, ultimoFmt: '—' };
+    return `<tr>
+      <td class="td-name">${r.nome || '—'}</td>
+      <td class="td-mono">${r.rg || '—'}</td>
+      <td class="td-mono">${r.cpf || '—'}</td>
+      <td>${r.cargo || '—'}</td>
+      <td>${r.empresa || '—'}</td>
+      <td>${motivoBadge(r.motivo)}</td>
+      <td style="text-align:center;font-weight:600;color:var(--info);">${ac.count}</td>
+      <td class="td-mono" style="color:var(--muted);font-size:.8rem;">${ac.ultimoFmt || '—'}</td>
+      <td>
+        <button class="action-btn" title="Editar cadastro" onclick="editRow('cadastro','${r._id}')">✏️</button>
+        <button class="action-btn del" title="Excluir cadastro" onclick="deleteRow('cadastro','${r._id}')">🗑</button>
+      </td>
+    </tr>`;
+  }).join('');
+
+  histRenderPagination('cadastro', data.length);
+}
+
+/* ── HISTÓRICO DE ACESSOS ── */
+function renderHistAcessos() {
+  const q        = (document.getElementById('hist-search').value || '').toLowerCase().trim();
+  const empresa  = (document.getElementById('hist-filt-empresa').value || '');
+  const cargo    = (document.getElementById('hist-filt-cargo').value || '');
+  const dataIni  = document.getElementById('hist-data-ini').value;
+  const dataFim  = document.getElementById('hist-data-fim').value;
+
+  let data = db.dados.filter(r => {
+    if (empresa && (r.empresa||'').toUpperCase() !== empresa.toUpperCase()) return false;
+    if (cargo   && (r.cargo||'').toUpperCase() !== cargo.toUpperCase())     return false;
+    if (q) {
+      const haystack = [r.nome, r.rg, r.cpf, r.placa, r.placaTrailer, r.empresa, r.cargo, r.data, r.responsavel].join(' ').toLowerCase();
+      if (!haystack.includes(q)) return false;
+    }
+    if (dataIni || dataFim) {
+      if (!r.data) return false;
+      const [d2,m2,y2] = r.data.split('/');
+      const rDate = new Date(`${y2}-${m2}-${d2}`);
+      if (dataIni && rDate < new Date(dataIni)) return false;
+      if (dataFim && rDate > new Date(dataFim)) return false;
+    }
+    return true;
+  });
+
+  // Ordenação
+  const { col, asc } = histSortState.acessos;
+  data.sort((a, b) => {
+    let va = (a[col] || '').toString().toLowerCase();
+    let vb = (b[col] || '').toString().toLowerCase();
+    if (col === 'data') {
+      // dd/mm/yyyy → yyyy-mm-dd
+      const toISO = s => { const p = s.split('/'); return p.length===3 ? `${p[2]}-${p[1]}-${p[0]}` : s; };
+      va = toISO(va); vb = toISO(vb);
+    }
+    return asc ? va.localeCompare(vb) : vb.localeCompare(va);
+  });
+
+  document.getElementById('cnt-historico').textContent = data.length;
+
+  const tbody = document.getElementById('hist-tbody-acessos');
+  if (!tbody) return;
+
+  const pg    = histPages.acessos;
+  const start = (pg - 1) * HIST_PAGE;
+  const slice = data.slice(start, start + HIST_PAGE);
+
+  if (data.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="12"><div class="empty-state"><div class="empty-icon">📋</div><div class="empty-text">Nenhum acesso encontrado.</div></div></td></tr>`;
+    document.getElementById('hist-pg-acessos').innerHTML = '';
+    return;
+  }
+
+  tbody.innerHTML = slice.map(r => {
+    const placaHtml = r.placa
+      ? `<span class="td-plate">${r.placa}</span>`
+      + (r.placaTrailer ? `<br><span class="td-plate" style="border-color:rgba(245,166,35,.4);background:rgba(245,166,35,.07);font-size:.7rem;">${r.placaTrailer} 🚛</span>` : '')
+      : '<span class="td-plate-empty">—</span>';
+    return `<tr>
+      <td class="td-mono">${r.data || '—'}</td>
+      <td class="td-name">${r.nome || '—'}</td>
+      <td class="td-mono">${r.rg || '—'}</td>
+      <td class="td-mono">${r.cpf || '—'}</td>
+      <td>${r.cargo || '—'}</td>
+      <td>${r.empresa || '—'}</td>
+      <td>${placaHtml}</td>
+      <td class="td-mono">${r.entrada || '—'}</td>
+      <td class="td-mono">${r.saida || '—'}</td>
+      <td>${statusBadge(r)}</td>
+      <td style="font-size:.8rem;color:var(--accent);">${r.responsavel || '<span style="color:var(--muted);font-style:italic;">—</span>'}</td>
+      <td>
+        <button class="action-btn success-btn" title="Registrar saída" onclick="registerSaida('${r._id}')" ${r.saida?'disabled style="opacity:.35;"':''}>🚪</button>
+        <button class="action-btn" title="Editar" onclick="editRow('dados','${r._id}')">✏️</button>
+        <button class="action-btn del" title="Excluir" onclick="deleteRow('dados','${r._id}')">🗑</button>
+      </td>
+    </tr>`;
+  }).join('');
+
+  histRenderPagination('acessos', data.length);
+}
+
+function histRenderPagination(tab, total) {
+  const totalPages = Math.ceil(total / HIST_PAGE);
+  const pg   = histPages[tab];
+  const wrap = document.getElementById('hist-pg-' + tab);
+  if (!wrap) return;
+  if (totalPages <= 1) { wrap.innerHTML = ''; return; }
+  let btns = '';
+  for (let i = 1; i <= totalPages; i++) {
+    btns += `<button class="page-btn ${i===pg?'active':''}" onclick="histGoPage('${tab}',${i})">${i}</button>`;
+  }
+  wrap.innerHTML = `
+    <div class="page-info">Exibindo ${((pg-1)*HIST_PAGE)+1}–${Math.min(pg*HIST_PAGE,total)} de ${total} registros</div>
+    <div class="page-btns">
+      <button class="page-btn" onclick="histGoPage('${tab}',${pg-1})" ${pg===1?'disabled':''}>‹</button>
+      ${btns}
+      <button class="page-btn" onclick="histGoPage('${tab}',${pg+1})" ${pg===totalPages?'disabled':''}>›</button>
+    </div>`;
+}
+
+function histGoPage(tab, pg) {
+  const src = tab === 'cadastro' ? db.cadastro : db.dados;
+  const max = Math.ceil(src.length / HIST_PAGE);
+  if (pg < 1 || pg > max) return;
+  histPages[tab] = pg;
+  renderHistorico();
+}
+
 initFirebase();
 </script>
+
+<footer style="
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 12px 0 16px;
+  user-select: none;
+">
+  <!-- Hexágono PJ -->
+  <div style="position:relative;width:28px;height:31px;flex-shrink:0;filter:drop-shadow(0 0 6px rgba(0,200,248,.5));">
+    <svg viewBox="0 0 100 110" fill="none" xmlns="http://www.w3.org/2000/svg" style="position:absolute;inset:0;width:100%;height:100%;">
+      <defs>
+        <linearGradient id="ftHexG" x1="0" y1="0" x2="100" y2="110" gradientUnits="userSpaceOnUse">
+          <stop offset="0%" stop-color="#0d3878"/>
+          <stop offset="100%" stop-color="#051225"/>
+        </linearGradient>
+        <linearGradient id="ftHexS" x1="0" y1="0" x2="100" y2="110" gradientUnits="userSpaceOnUse">
+          <stop offset="0%" stop-color="#00eaff"/>
+          <stop offset="50%" stop-color="#0088cc"/>
+          <stop offset="100%" stop-color="#00c8f8"/>
+        </linearGradient>
+      </defs>
+      <polygon points="50,4 96,28 96,82 50,106 4,82 4,28" fill="url(#ftHexG)" stroke="url(#ftHexS)" stroke-width="3"/>
+      <circle cx="50" cy="4"   r="3" fill="#00eaff" opacity=".9"/>
+      <circle cx="96" cy="28"  r="3" fill="#00eaff" opacity=".9"/>
+      <circle cx="96" cy="82"  r="3" fill="#00eaff" opacity=".9"/>
+      <circle cx="50" cy="106" r="3" fill="#00eaff" opacity=".9"/>
+      <circle cx="4"  cy="82"  r="3" fill="#00eaff" opacity=".9"/>
+      <circle cx="4"  cy="28"  r="3" fill="#00eaff" opacity=".9"/>
+    </svg>
+    <span style="
+      position:relative;z-index:2;
+      font-family:'Bebas Neue',sans-serif;
+      font-size:.85rem;letter-spacing:-.5px;
+      color:#eef4ff;text-shadow:0 0 10px rgba(0,234,255,.7);
+      display:flex;align-items:center;justify-content:center;
+      height:100%;
+    ">P<span style="color:#00eaff;">J</span></span>
+  </div>
+  <!-- Texto -->
+  <span style="
+    font-family:'DM Sans',sans-serif;
+    font-size:.72rem;
+    font-weight:500;
+    letter-spacing:.22em;
+    text-transform:uppercase;
+    color:rgba(0,200,248,.6);
+    text-shadow:0 0 12px rgba(0,200,248,.3);
+  ">Desenvolvido por <strong style="color:rgba(0,234,255,.8);font-weight:600;letter-spacing:.18em;">PJ Tecnologia e Sistemas</strong></span>
+</footer>
+
 </body>
 </html>
