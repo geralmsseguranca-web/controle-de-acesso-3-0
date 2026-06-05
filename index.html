@@ -4023,14 +4023,16 @@ function closeActionBalloon() {
 
 async function actionBalloonEntrada() {
   if (!_acbCadastroId || _acbIsDentro) return;
+  // Capturar o id ANTES de closeActionBalloon() zerá-lo
+  const cadastroId = _acbCadastroId;
   closeActionBalloon();
   // Limpar campo de busca
   const headerInput = document.getElementById('header-search');
   if (headerInput) headerInput.value = '';
   clearTimeout(window._gsDebounce);
   clearTimeout(window._nfbGlobalTimer);
-  pedirConfirmacaoEntrada(_acbCadastroId, async () => {
-    const r = db.cadastro.find(x => x._id === _acbCadastroId);
+  pedirConfirmacaoEntrada(cadastroId, async () => {
+    const r = db.cadastro.find(x => x._id === cadastroId);
     if (!r) return;
     const entrada = new Date().toTimeString().slice(0,5);
     const responsavel = _pendingEntradaResponsavel || '';
